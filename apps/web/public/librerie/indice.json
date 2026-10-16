@@ -1,0 +1,34 @@
+[
+  {
+    "distretto": "ginocchio",
+    "lato": "destro",
+    "nome": "Ginocchio",
+    "versione": "0.1",
+    "stato": "da validare",
+    "file": "ginocchio-destro.json"
+  },
+  {
+    "distretto": "ginocchio",
+    "lato": "sinistro",
+    "nome": "Ginocchio",
+    "versione": "0.1",
+    "stato": "da validare",
+    "file": "ginocchio-sinistro.json"
+  },
+  {
+    "distretto": "spalla",
+    "lato": "destro",
+    "nome": "Spalla",
+    "versione": "0.1",
+    "stato": "da validare",
+    "file": "spalla-destro.json"
+  },
+  {
+    "distretto": "spalla",
+    "lato": "sinistro",
+    "nome": "Spalla",
+    "versione": "0.1",
+    "stato": "da validare",
+    "file": "spalla-sinistro.json"
+  }
+]

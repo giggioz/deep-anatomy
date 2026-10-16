@@ -1,0 +1,27 @@
+{
+  "name": "deep-anatomy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deep Anatomy: il referto dell'ortopedico spiegato al paziente, sulle Tavole Anatomiche pregenerate.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n web,server -c blue,magenta \"npm:dev -w @deep-anatomy/web\" \"npm:dev -w @deep-anatomy/server\"",
+    "dev:web": "npm run dev -w @deep-anatomy/web",
+    "dev:server": "npm run dev -w @deep-anatomy/server",
+    "build": "npm run build -w @deep-anatomy/web",
+    "start": "npm run start -w @deep-anatomy/server",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "librerie": "node tools/importa-librerie.mjs"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.3"
+  }
+}

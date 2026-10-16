@@ -1,0 +1,27 @@
+<defs>
+  <radialGradient id="gBone" cx=".36" cy=".3" r=".85">
+    <stop offset="0" stop-color="#FDF9F0"/><stop offset=".55" stop-color="#F0E4CC"/><stop offset="1" stop-color="#D5BF98"/>
+  </radialGradient>
+  <linearGradient id="gMus" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#E59C88"/><stop offset="1" stop-color="#BC5A4A"/>
+  </linearGradient>
+  <radialGradient id="gMen" cx=".4" cy=".35" r=".9">
+    <stop offset="0" stop-color="#FBFCFD"/><stop offset="1" stop-color="#D9E3EA"/>
+  </radialGradient>
+  <linearGradient id="gFluid" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8CC2F2"/><stop offset="1" stop-color="#2F7FCB"/>
+  </linearGradient>
+  <radialGradient id="gEdema">
+    <stop offset="0" stop-color="#E23E28" stop-opacity=".9"/><stop offset=".55" stop-color="#E23E28" stop-opacity=".45"/><stop offset="1" stop-color="#E23E28" stop-opacity="0"/>
+  </radialGradient>
+  <pattern id="pTrab" width="28" height="28" patternUnits="userSpaceOnUse">
+    <path d="M2 6 q5 -4 9 1 M15 3 q4 5 10 2 M5 15 q3 6 9 4 M18 13 q5 -2 7 5 M1 23 q6 -3 10 2 M16 23 q4 3 9 -1 M11 10 q2 2 4 0" fill="none" stroke="#B89F73" stroke-width=".9" stroke-linecap="round" opacity=".55"/>
+  </pattern>
+  <filter id="fSh" x="-15%" y="-15%" width="130%" height="135%">
+    <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#4A3418" flood-opacity=".22"/>
+  </filter>
+  <filter id="fGlowS" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.5"/></filter>
+  <filter id="fMk" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="1.5" stdDeviation="1.6" flood-color="#000" flood-opacity=".3"/>
+  </filter>
+</defs>
