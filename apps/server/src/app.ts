@@ -17,7 +17,7 @@ import { conta, registraAdmin } from './admin.js';
 import type { Archivio } from './db.js';
 import { creaPosta, type Spedisci } from './posta.js';
 
-export type OpzioniApp = { archivio: Archivio; urlApp: string; spedisci?: Spedisci; log?: boolean; limiti?: boolean };
+export type OpzioniApp = { archivio: Archivio; urlApp: string; spedisci?: Spedisci; log?: boolean; limiti?: boolean; adminPerTutti?: boolean };
 
 export async function creaApp(o: OpzioniApp): Promise<FastifyInstance> {
   const app = Fastify({
@@ -34,9 +34,9 @@ export async function creaApp(o: OpzioniApp): Promise<FastifyInstance> {
     reply.header('Referrer-Policy', 'same-origin');
   });
 
-  await registraAccesso(app, { archivio: o.archivio, urlApp: o.urlApp, spedisci: o.spedisci ?? creaPosta(app.log), limiti: o.limiti });
+  await registraAccesso(app, { archivio: o.archivio, urlApp: o.urlApp, spedisci: o.spedisci ?? creaPosta(app.log), limiti: o.limiti, adminPerTutti: o.adminPerTutti });
 
-  await registraAdmin(app, o.archivio);
+  await registraAdmin(app, o.archivio, o.adminPerTutti);
 
   app.get('/api/salute', { config: { pubblica: true } }, async () => ({ ok: true, ai: aiDisponibile(), modello: aiDisponibile() ? modello() : null }));
 

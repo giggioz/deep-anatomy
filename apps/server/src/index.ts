@@ -23,10 +23,14 @@ const port = Number(process.env.PORT ?? 8787);
 const host = process.env.HOST ?? '127.0.0.1';
 const urlApp = process.env.URL_APP?.trim() || 'http://localhost:5173';
 
+// in locale ogni account vede #/admin; in produzione URL_APP è il dominio pubblico e vale solo AMMINISTRATORE
+const adminPerTutti = ['localhost', '127.0.0.1'].includes(new URL(urlApp).hostname);
+
 const archivio = await apriArchivio(uri, process.env.MONGO_DB);
-const app = await creaApp({ archivio, urlApp });
+const app = await creaApp({ archivio, urlApp, adminPerTutti });
 app.addHook('onClose', () => archivio.chiudi());
 for (const segnale of ['SIGINT', 'SIGTERM'] as const) process.once(segnale, () => void app.close().then(() => process.exit(0)));
 
 await app.listen({ port, host });
+if (adminPerTutti) app.log.info('In locale: ogni account vede la pagina di amministrazione');
 app.log.info(aiDisponibile() ? `Importa usa ${modello()}` : 'ANTHROPIC_API_KEY assente: Importa funziona solo con i referti di esempio');

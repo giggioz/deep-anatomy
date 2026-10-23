@@ -14,6 +14,24 @@ function quando(iso: string): string {
 export function Home() {
   const elenco = useElencoDiagnosi();
   const [conferma, setConferma] = useState<string | null>(null);
+  const [scelte, setScelte] = useState<Set<string>>(new Set());
+  const [confermaScelte, setConfermaScelte] = useState(false);
+  // solo le diagnosi ancora presenti (un'altra scheda può averle eliminate)
+  const selezionate = elenco.filter((d) => scelte.has(d.id)).map((d) => d.id);
+  const tutteScelte = elenco.length > 0 && selezionate.length === elenco.length;
+  const scegli = (id: string) => {
+    setConfermaScelte(false);
+    setScelte((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  };
+  const scegliTutte = () => {
+    setConfermaScelte(false);
+    setScelte(tutteScelte ? new Set() : new Set(elenco.map((d) => d.id)));
+  };
+  const eliminaScelte = () => {
+    eliminaDiagnosi(selezionate);
+    setScelte(new Set());
+    setConfermaScelte(false);
+  };
   return (
     <main className="page narrow">
       <div className="head">
@@ -58,9 +76,39 @@ export function Home() {
             Ancora nessuna diagnosi. Per vedere subito il risultato, apri <a href={link.importa}>Importa</a> e scegli un referto di esempio.
           </p>
         ) : (
+          <>
+          <div className="row between selezione">
+            <label className="row" style={{ gap: 8 }}>
+              <input
+                type="checkbox" checked={tutteScelte} onChange={scegliTutte}
+                ref={(el) => { if (el) el.indeterminate = selezionate.length > 0 && !tutteScelte; }}
+              />
+              <small>{selezionate.length ? `${selezionate.length} selezionate` : 'Seleziona tutte'}</small>
+            </label>
+            {selezionate.length > 0 && (
+              <div className="row">
+                {confermaScelte ? (
+                  <>
+                    <button type="button" className="btn small danger" onClick={eliminaScelte}>
+                      Elimina {selezionate.length === 1 ? '1 diagnosi' : `${selezionate.length} diagnosi`}
+                    </button>
+                    <button type="button" className="btn small" onClick={() => setConfermaScelte(false)}>Annulla</button>
+                  </>
+                ) : (
+                  <button type="button" className="btn small danger" onClick={() => setConfermaScelte(true)}>
+                    <IcoElimina size={16} /> Elimina selezionate
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
           <div className="list">
             {elenco.map((d) => (
-              <div className="list-row" key={d.id}>
+              <div className={`list-row con-scelta${scelte.has(d.id) ? ' scelta' : ''}`} key={d.id}>
+                <input
+                  type="checkbox" checked={scelte.has(d.id)} onChange={() => scegli(d.id)}
+                  aria-label={`Seleziona ${nomeDistretto(d.distretto, d.lato)}${d.paziente ? ` · ${d.paziente}` : ''}`}
+                />
                 <div>
                   <a href={d.stato === 'approvata' ? link.passo(d.id, 'paziente') : link.passo(d.id, 'diagnosi')}>
                     <span className="cap">{nomeDistretto(d.distretto, d.lato)}</span>
@@ -88,6 +136,7 @@ export function Home() {
               </div>
             ))}
           </div>
+          </>
         )}
       </section>
     </main>

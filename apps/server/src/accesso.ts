@@ -52,9 +52,11 @@ export type OpzioniAccesso = {
   urlApp: string;
   /** limite di richieste per IP sulle rotte di accesso: si spegne solo nei test */
   limiti?: boolean;
+  /** in locale (URL_APP su localhost) ogni account è amministratore, per provare #/admin */
+  adminPerTutti?: boolean;
 };
 
-const pubblico = (u: UtenteDb): Utente => ({ email: u.email, nome: u.nome, ...(u.email === AMMINISTRATORE ? { amministratore: true } : {}) });
+export const eAmministratore = (u: UtenteDb | null, adminPerTutti?: boolean) => !!u && (adminPerTutti || u.email === AMMINISTRATORE);
 
 /** I link delle email: il gettone sta dopo il #, quindi non finisce nei log del server né nel Referer. */
 const linkApp = (urlApp: string, percorso: string) => `${urlApp.replace(/\/+$/, '')}/#/${percorso}`;
@@ -62,6 +64,7 @@ const linkApp = (urlApp: string, percorso: string) => `${urlApp.replace(/\/+$/, 
 export async function registraAccesso(app: FastifyInstance, o: OpzioniAccesso): Promise<void> {
   const { archivio } = o;
   const sicuro = o.urlApp.startsWith('https://');
+  const pubblico = (u: UtenteDb): Utente => ({ email: u.email, nome: u.nome, ...(eAmministratore(u, o.adminPerTutti) ? { amministratore: true } : {}) });
 
   await app.register(cookie);
   await app.register(rateLimit, { global: false });

@@ -2,20 +2,21 @@
  * Conteggi d'uso e pagina di amministrazione.
  *
  *   POST /api/attivita         la web app segnala una diagnosi creata o approvata (solo tipo, distretto, origine)
- *   GET  /api/admin/account    tutti gli account con date e conteggi, e le registrazioni in attesa (solo AMMINISTRATORE)
+ *   GET  /api/admin/account    tutti gli account con date e conteggi, e le registrazioni in attesa (solo AMMINISTRATORE; in locale tutti)
  *   GET  /admin                porta a /#/admin (la web app usa l'hash per le rotte)
  */
 import type { FastifyInstance } from 'fastify';
 import type { ObjectId } from 'mongodb';
-import { AMMINISTRATORE, RichiestaAttivita, type RispostaAdmin } from '@deep-anatomy/shared';
+import { RichiestaAttivita, type RispostaAdmin } from '@deep-anatomy/shared';
 import type { Archivio } from './db.js';
+import { eAmministratore } from './accesso.js';
 
 /** +1 a un conteggio dell'utente, es. conta(archivio, id, { 'conteggi.importazioni': 1 }) */
 export function conta(archivio: Archivio, utente: ObjectId, inc: Record<string, number>) {
   return archivio.utenti.updateOne({ _id: utente }, { $inc: inc });
 }
 
-export async function registraAdmin(app: FastifyInstance, archivio: Archivio): Promise<void> {
+export async function registraAdmin(app: FastifyInstance, archivio: Archivio, adminPerTutti?: boolean): Promise<void> {
   app.get('/admin', async (_req, reply) => reply.redirect('/#/admin'));
 
   app.post('/api/attivita', async (req, reply) => {
@@ -30,7 +31,7 @@ export async function registraAdmin(app: FastifyInstance, archivio: Archivio): P
 
   app.addHook('onRequest', async (req, reply) => {
     // dopo il controllo della sessione (registrato prima in accesso.ts): qui req.utente c'è già
-    if (req.url.startsWith('/api/admin/') && req.utente?.email !== AMMINISTRATORE) {
+    if (req.url.startsWith('/api/admin/') && !eAmministratore(req.utente, adminPerTutti)) {
       return reply.code(403).send({ errore: 'Pagina riservata all\'amministratore.' });
     }
   });

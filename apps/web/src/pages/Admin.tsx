@@ -129,7 +129,7 @@ export function Admin() {
               <thead>
                 <tr>
                   {COLONNE.map((c) => (
-                    <th key={c.chiave} className={c.num ? 'num' : undefined}
+                    <th key={c.chiave} className={c.num ? 'cifra' : undefined}
                       aria-sort={ordine.chiave === c.chiave ? (ordine.su ? 'ascending' : 'descending') : undefined}>
                       <button type="button" onClick={() => ordina(c.chiave)}>
                         {c.titolo}{ordine.chiave === c.chiave && <span aria-hidden="true">{ordine.su ? ' ↑' : ' ↓'}</span>}
@@ -149,11 +149,11 @@ export function Admin() {
                       <td title={data(a.creato)}>{relativa(a.creato)}</td>
                       <td title={data(a.ultimoAccesso)}>{relativa(a.ultimoAccesso)}</td>
                       <td title={data(ultima)}>{relativa(ultima)}</td>
-                      <td className="num">{a.sessioni}</td>
-                      <td className="num">{a.diagnosi}</td>
-                      <td className="num">{a.importate}</td>
-                      <td className="num">{a.approvate}</td>
-                      <td className="num">{a.importazioni}</td>
+                      <td className="cifra">{a.sessioni}</td>
+                      <td className="cifra">{a.diagnosi}</td>
+                      <td className="cifra">{a.importate}</td>
+                      <td className="cifra">{a.approvate}</td>
+                      <td className="cifra">{a.importazioni}</td>
                       <td className="admin-distretti">
                         {Object.entries(a.distretti).sort((x, y) => y[1] - x[1])
                           .map(([k, n]) => `${DISTRETTI_INFO[k as Distretto]?.nome ?? k} ${n}`).join(' · ') || '—'}

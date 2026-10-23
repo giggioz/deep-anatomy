@@ -85,6 +85,7 @@ export function aggiornaDiagnosi(id: string, f: (d: Diagnosi) => Diagnosi, opz: 
   }));
 }
 
-export function eliminaDiagnosi(id: string): void {
-  scriviTutte(leggiTutte().filter((d) => d.id !== id));
+export function eliminaDiagnosi(ids: string | string[]): void {
+  const via = new Set(typeof ids === 'string' ? [ids] : ids);
+  scriviTutte(leggiTutte().filter((d) => !via.has(d.id)));
 }

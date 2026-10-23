@@ -67,7 +67,8 @@ risposta, e al proprietario arriva un avviso.
 - Limiti contro i tentativi a raffica: per IP sulle rotte di accesso, e blocco di 15 minuti dopo 10 password sbagliate.
 - Tutte le rotte `/api/*` chiedono l'accesso, tranne `/api/salute` e quelle di `/api/auth/*` che servono per entrare.
 
-**Amministrazione** (`/admin`, solo per l'account `AMMINISTRATORE` in `packages/shared/src/admin.ts`): tabella di tutti
+**Amministrazione** (`/admin`, solo per l'account `AMMINISTRATORE` in `packages/shared/src/admin.ts`; in locale, con
+`URL_APP` su localhost, per ogni account, e `npm run db` crea account finti `@esempio.it` per provarla): tabella di tutti
 gli account con creazione, ultimo accesso, ultima attività, sessioni aperte, diagnosi create (e importate), approvazioni,
 chiamate al modello e distretti usati, più le registrazioni in attesa. Le diagnosi restano nel browser: al server arriva
 solo un conteggio (`POST /api/attivita`: tipo, distretto, origine), senza testi né paziente.
