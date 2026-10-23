@@ -21,7 +21,8 @@ export const RichiestaConferma = z.object({ gettone: z.string().min(20).max(200)
 export const RichiestaReimposta = z.object({ gettone: z.string().min(20).max(200), password: NuovaPassword });
 export const RichiestaCambiaPassword = z.object({ attuale: z.string().min(1).max(PASSWORD_MAX), nuova: NuovaPassword });
 
-export const Utente = z.object({ email: z.string(), nome: z.string() });
+/** amministratore: vede #/admin (vedi admin.ts) */
+export const Utente = z.object({ email: z.string(), nome: z.string(), amministratore: z.boolean().optional() });
 export const RispostaUtente = z.object({ utente: Utente });
 /** GET /api/auth/gettone?t=…: il link di recupero è ancora valido? per quale account? */
 export const RispostaGettone = z.object({ email: z.string() });

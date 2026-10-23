@@ -4,6 +4,7 @@
  *   GET  /api/salute    il server risponde? c'è la chiave del modello? (pubblica)
  *   POST /api/importa   referto (testo, foto o PDF) → testi e reperti con codice (serve l'accesso)
  *   /api/auth/*         accesso dei medici, vedi accesso.ts
+ *   /api/attivita, /api/admin/*, /admin   conteggi d'uso e amministrazione, vedi admin.ts
  */
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +13,7 @@ import fastifyStatic from '@fastify/static';
 import { RichiestaImporta } from '@deep-anatomy/shared';
 import { importa, ErroreImporta, modello, aiDisponibile } from './importa.js';
 import { registraAccesso } from './accesso.js';
+import { conta, registraAdmin } from './admin.js';
 import type { Archivio } from './db.js';
 import { creaPosta, type Spedisci } from './posta.js';
 
@@ -34,13 +36,17 @@ export async function creaApp(o: OpzioniApp): Promise<FastifyInstance> {
 
   await registraAccesso(app, { archivio: o.archivio, urlApp: o.urlApp, spedisci: o.spedisci ?? creaPosta(app.log), limiti: o.limiti });
 
+  await registraAdmin(app, o.archivio);
+
   app.get('/api/salute', { config: { pubblica: true } }, async () => ({ ok: true, ai: aiDisponibile(), modello: aiDisponibile() ? modello() : null }));
 
   app.post('/api/importa', async (req, reply) => {
     const r = RichiestaImporta.safeParse(req.body);
     if (!r.success) return reply.code(400).send({ errore: 'Richiesta non valida.' });
     try {
-      return await importa(r.data);
+      const risposta = await importa(r.data);
+      await conta(o.archivio, req.utente!._id, { 'conteggi.importazioni': 1 });
+      return risposta;
     } catch (e) {
       if (e instanceof ErroreImporta) return reply.code(e.status).send({ errore: e.message });
       req.log.error(e);

@@ -14,6 +14,9 @@ function Definizioni() {
   );
 }
 
+// /admin (senza #): in produzione lo reindirizza il server, in sviluppo ci pensiamo qui
+if (window.location.pathname.replace(/\/+$/, '') === '/admin') history.replaceState(null, '', '/#/admin');
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Definizioni />

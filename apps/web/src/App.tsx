@@ -15,6 +15,7 @@ import { Conferma } from './pages/Conferma';
 import { Recupero } from './pages/Recupero';
 import { ImpostaPassword } from './pages/ImpostaPassword';
 import { Account } from './pages/Account';
+import { Admin } from './pages/Admin';
 import { PieDiPagina } from './components/PieDiPagina';
 import { useAccesso } from './store/accesso';
 
@@ -56,6 +57,9 @@ export function App() {
   switch (rotta.pagina) {
     case 'home': case 'registrazione': case 'recupero': pagina = <Home />; break;
     case 'account': pagina = <Account utente={accesso.utente} />; break;
+    case 'admin': pagina = accesso.utente.amministratore
+      ? <Admin />
+      : <Messaggio titolo="Pagina non trovata">L'indirizzo non corrisponde a nessuna pagina.</Messaggio>; break;
     case 'nuova': pagina = <Nuova />; break;
     case 'importa': pagina = <Importa />; break;
     case 'sconosciuta': pagina = <Messaggio titolo="Pagina non trovata">L'indirizzo non corrisponde a nessuna pagina.</Messaggio>; break;

@@ -7,7 +7,7 @@ import { CAMPI_TESTO, type Diagnosi } from '@deep-anatomy/shared';
 import type { LibreriaPronta } from '../tavole/libreria';
 import { PaginaPaziente } from '../components/PaginaPaziente';
 import { IcoStampa } from '../components/Icone';
-import { aggiornaDiagnosi } from '../store/diagnosi';
+import { aggiornaDiagnosi, segnala } from '../store/diagnosi';
 import { link } from '../router';
 
 export function Paziente({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
@@ -32,6 +32,7 @@ export function Paziente({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
 
   function approva() {
     aggiornaDiagnosi(d.id, (x) => ({ ...x, stato: 'approvata' }), { tieniStato: true });
+    segnala('approvata', d);
   }
 
   function stampa() {

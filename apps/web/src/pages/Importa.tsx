@@ -1,10 +1,11 @@
 /**
  * Importa diagnosi: un modello linguistico legge il referto (testo, foto o PDF) e precompila lo stesso modulo
  * di Crea diagnosi. Il medico controlla tutto prima che arrivi al paziente.
- * Senza chiave sul server funzionano i referti di esempio, con il risultato già pronto.
+ * Senza chiave sul server funzionano i referti di esempio, con il risultato già pronto: un clic sull'esempio apre la diagnosi.
+ * Con la chiave l'esempio precompila il modulo, così si prova il modello sullo stesso referto.
  */
 import { useEffect, useRef, useState } from 'react';
-import { RispostaImporta, rinumera, type Distretto, type Lato, type RichiestaImporta } from '@deep-anatomy/shared';
+import { RispostaImporta, nomeDistretto, rinumera, type Distretto, type Lato, type RichiestaImporta } from '@deep-anatomy/shared';
 import { SceltaDistretto } from '../components/SceltaDistretto';
 import { IcoFile, IcoChiudi } from '../components/Icone';
 import { ESEMPI, esempioPerTesto, type Esempio } from '../esempi/esempi';
@@ -74,6 +75,8 @@ export function Importa() {
   }
 
   function usaEsempio(e: Esempio) {
+    // senza modello non c'è niente da interpretare: si apre subito il risultato pronto
+    if (salute && !salute.ai) return apri(e.risultato, e);
     setDistretto(e.distretto);
     setLato(e.lato);
     setTesto(e.testo);
@@ -81,10 +84,9 @@ export function Importa() {
     setErrore(null);
   }
 
-  function apri(r: RispostaImporta) {
+  function apri(r: RispostaImporta, dove: { distretto: Distretto; lato: Lato } = { distretto, lato }) {
     const d = creaDiagnosi({
-      distretto,
-      lato,
+      ...dove,
       paziente: '',
       medico: utente.nome,
       origine: 'importata',
@@ -112,6 +114,11 @@ export function Importa() {
         if (usaPronto) {
           apri(esempio.risultato);
           return;
+        }
+        if (r.status === 503 && !salute?.ai) {
+          throw new Error(esempio
+            ? `Questo referto di esempio è per ${nomeDistretto(esempio.distretto, esempio.lato)}: rimetti distretto e lato, oppure clicca direttamente l'esempio qui sopra.`
+            : 'Nella demo si possono usare solo i referti di esempio, senza modificarne il testo: clicca un esempio qui sopra.');
         }
         const msg = (j as { errore?: string }).errore;
         throw new Error(msg ?? `Il server ha risposto ${r.status}.`);

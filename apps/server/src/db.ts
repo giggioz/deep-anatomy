@@ -18,7 +18,14 @@ export type UtenteDb = {
   hash: string;
   attivo: boolean;
   creato: Date;
+  /** ultimo accesso con email e password */
   ultimoAccesso: Date | null;
+  /** ultima richiesta con la sessione aperta (aggiornata al massimo ogni 5 minuti); assente negli account più vecchi */
+  ultimaAttivita?: Date;
+  /** conteggi d'uso: le diagnosi stanno nel browser, al server arriva solo che ne è stata creata o approvata una */
+  conteggi?: { diagnosi?: number; importate?: number; approvate?: number; importazioni?: number };
+  /** diagnosi create per distretto */
+  distretti?: Record<string, number>;
   /** tentativi di accesso sbagliati di fila: oltre la soglia l'account si blocca per un po' */
   tentativi: number;
   bloccatoFino: Date | null;

@@ -1,11 +1,13 @@
 /**
  * Le diagnosi della demo, salvate nel browser (localStorage).
- * Nessun server, nessun dato che esce dal computer del medico. In produzione questo diventa un'API con login.
+ * Le diagnosi non escono dal computer del medico: al server arriva solo che ne è stata creata o approvata una
+ * (distretto e origine, per la pagina di amministrazione). In produzione questo diventa un'API con login.
  * Se il browser non permette di salvare (navigazione privata, permessi), si lavora in memoria.
  */
 import { useSyncExternalStore } from 'react';
 import { Diagnosi, TESTI_VUOTI, type Distretto, type Lato } from '@deep-anatomy/shared';
 import { z } from 'zod';
+import { api } from './accesso';
 
 const CHIAVE = 'deep-anatomy:diagnosi:v1';
 const Elenco = z.array(Diagnosi);
@@ -47,6 +49,14 @@ export function useDiagnosi(id: string | undefined): Diagnosi | undefined {
   return id ? tutte.find((d) => d.id === id) : undefined;
 }
 
+/** conteggio d'uso per #/admin: se non arriva, pazienza */
+export function segnala(tipo: 'creata' | 'approvata', d: Pick<Diagnosi, 'distretto' | 'origine'>): void {
+  api('/api/attivita', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, keepalive: true,
+    body: JSON.stringify({ tipo, distretto: d.distretto, origine: d.origine }),
+  }).catch(() => {});
+}
+
 function nuovoId(): string {
   try { return crypto.randomUUID().slice(0, 8); } catch { return Math.random().toString(36).slice(2, 10); }
 }
@@ -62,6 +72,7 @@ export function creaDiagnosi(dati: {
     ...(dati.da_controllare?.length ? { da_controllare: dati.da_controllare } : {}),
   };
   scriviTutte([d, ...leggiTutte()]);
+  segnala('creata', d);
   return d;
 }
 

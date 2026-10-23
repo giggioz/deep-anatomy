@@ -48,6 +48,9 @@ export function Barra({ rotta, utente }: { rotta: Rotta; utente: Utente }) {
               })}
             </nav>
           )}
+          {utente.amministratore && (
+            <a className="btn small barra-admin" href={link.admin} aria-current={rotta.pagina === 'admin' ? 'page' : undefined}>Admin</a>
+          )}
           <a className="btn small barra-utente" href={link.account} title="Account, password, esci"
             aria-current={rotta.pagina === 'account' ? 'page' : undefined}>{utente.nome || utente.email}</a>
         </div>

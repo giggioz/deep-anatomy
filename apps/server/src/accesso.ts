@@ -21,7 +21,7 @@ import rateLimit from '@fastify/rate-limit';
 import { ObjectId, MongoServerError } from 'mongodb';
 import {
   RichiestaAccesso, RichiestaCambiaPassword, RichiestaConferma, RichiestaRecupero, RichiestaRegistrazione, RichiestaReimposta,
-  problemaPassword, type Utente,
+  AMMINISTRATORE, problemaPassword, type Utente,
 } from '@deep-anatomy/shared';
 import type { Archivio, UtenteDb } from './db.js';
 import { hashFinto, hashPassword, impronta, nuovoGettone, verificaPassword } from './password.js';
@@ -38,6 +38,8 @@ const MAX_IN_ATTESA = 5;
 /** dopo 10 password sbagliate di fila l'account resta bloccato 15 minuti */
 const MAX_TENTATIVI = 10;
 const BLOCCO = 15 * 60 * 1000;
+/** ultimaAttivita si scrive al massimo ogni 5 minuti, non a ogni richiesta */
+const PASSO_ATTIVITA = 5 * 60 * 1000;
 
 declare module 'fastify' {
   interface FastifyRequest { utente: UtenteDb | null }
@@ -52,7 +54,7 @@ export type OpzioniAccesso = {
   limiti?: boolean;
 };
 
-const pubblico = (u: UtenteDb): Utente => ({ email: u.email, nome: u.nome });
+const pubblico = (u: UtenteDb): Utente => ({ email: u.email, nome: u.nome, ...(u.email === AMMINISTRATORE ? { amministratore: true } : {}) });
 
 /** I link delle email: il gettone sta dopo il #, quindi non finisce nei log del server né nel Referer. */
 const linkApp = (urlApp: string, percorso: string) => `${urlApp.replace(/\/+$/, '')}/#/${percorso}`;
@@ -85,6 +87,9 @@ export async function registraAccesso(app: FastifyInstance, o: OpzioniAccesso): 
       const u = s && (await archivio.utenti.findOne({ _id: s.utente, attivo: true }));
       if (s && u) {
         req.utente = u;
+        if (!u.ultimaAttivita || Date.now() - u.ultimaAttivita.getTime() > PASSO_ATTIVITA) {
+          await archivio.utenti.updateOne({ _id: u._id }, { $set: { ultimaAttivita: new Date() } });
+        }
         if (s.scade.getTime() - Date.now() < DURATA_SESSIONE / 2) {
           const scade = new Date(Date.now() + DURATA_SESSIONE);
           await archivio.sessioni.updateOne({ _id: id }, { $set: { scade } });

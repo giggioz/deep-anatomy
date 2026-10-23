@@ -8,6 +8,7 @@
  *   #/d/<id>/paziente      3 · la pagina del paziente: controlli, approvazione, stampa (il vecchio …/anteprima porta qui)
  *   …?al=<id>              dopo l'apertura porta al campo con quell'id (es. dagli avvisi del passo 3)
  *   #/account              il tuo account: cambio password, esci
+ *   #/admin                tutti gli account, solo per l'amministratore (anche /admin porta qui)
  * Raggiungibili anche senza accesso:
  *   #/registrazione        nuovo account: nome, email, password
  *   #/conferma?t=<gettone> link di conferma dell'email: crea l'account ed entra
@@ -24,6 +25,7 @@ export type Rotta =
   | { pagina: 'nuova' }
   | { pagina: 'importa' }
   | { pagina: 'account' }
+  | { pagina: 'admin' }
   | { pagina: 'registrazione' }
   | { pagina: 'conferma'; gettone: string }
   | { pagina: 'recupero' }
@@ -37,6 +39,7 @@ export function leggiRotta(hash: string): Rotta {
   if (parti[0] === 'nuova') return { pagina: 'nuova' };
   if (parti[0] === 'importa') return { pagina: 'importa' };
   if (parti[0] === 'account') return { pagina: 'account' };
+  if (parti[0] === 'admin') return { pagina: 'admin' };
   if (parti[0] === 'registrazione') return { pagina: 'registrazione' };
   if (parti[0] === 'conferma') return { pagina: 'conferma', gettone: parametro(hash, 't') ?? '' };
   if (parti[0] === 'recupero') return { pagina: 'recupero' };
@@ -69,6 +72,7 @@ export const link = {
   nuova: '#/nuova',
   importa: '#/importa',
   account: '#/account',
+  admin: '#/admin',
   registrazione: '#/registrazione',
   recupero: '#/recupero',
   passo: (id: string, p: Passo, al?: string) => `#/d/${id}/${p}${al ? `?al=${al}` : ''}`,

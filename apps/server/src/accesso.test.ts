@@ -273,3 +273,48 @@ describe('nel database', () => {
     assert.match((await archivio.sessioni.findOne({}))!._id, /^[0-9a-f]{64}$/);
   });
 });
+
+describe('amministrazione', () => {
+  const ADMIN = 'giggioz@gmail.com';
+  const elenco = (cookie: string) => app.inject({ url: '/api/admin/account', headers: { cookie } });
+
+  test('/api/admin/* risponde solo all\'amministratore', async () => {
+    const medico = await medicoConfermato();
+    assert.equal((await elenco(medico)).statusCode, 403);
+    assert.equal((await app.inject('/api/admin/account')).statusCode, 401);
+    assert.equal((await io(medico)).json().utente.amministratore, undefined);
+
+    await registra(ADMIN, PASSWORD, 'Admin');
+    const admin = cookieDi(await post('/api/auth/conferma', { gettone: ultimoGettone('conferma') }));
+    assert.equal((await io(admin)).json().utente.amministratore, true);
+    const r = await elenco(admin);
+    assert.equal(r.statusCode, 200);
+    assert.deepEqual(r.json().account.map((a: { email: string }) => a.email).sort(), [ADMIN, EMAIL].sort());
+  });
+
+  test('i conteggi d\'uso finiscono nell\'elenco', async () => {
+    const medico = await medicoConfermato();
+    assert.equal((await post('/api/attivita', { tipo: 'creata', distretto: 'spalla', origine: 'importata' }, medico)).statusCode, 200);
+    await post('/api/attivita', { tipo: 'creata', distretto: 'ginocchio', origine: 'creata' }, medico);
+    await post('/api/attivita', { tipo: 'approvata', distretto: 'ginocchio', origine: 'creata' }, medico);
+    assert.equal((await post('/api/attivita', { tipo: 'creata', distretto: '$set', origine: 'creata' }, medico)).statusCode, 400);
+
+    await registra(ADMIN, PASSWORD, 'Admin');
+    const admin = cookieDi(await post('/api/auth/conferma', { gettone: ultimoGettone('conferma') }));
+    await registra('attesa@esempio.it', PASSWORD, 'In attesa');
+    const { account, inAttesa } = (await elenco(admin)).json();
+    const m = account.find((a: { email: string }) => a.email === EMAIL);
+    assert.equal(m.diagnosi, 2);
+    assert.equal(m.importate, 1);
+    assert.equal(m.approvate, 1);
+    assert.equal(m.sessioni, 1);
+    assert.deepEqual(m.distretti, { spalla: 1, ginocchio: 1 });
+    assert.deepEqual(inAttesa.map((g: { email: string }) => g.email), ['attesa@esempio.it']);
+  });
+
+  test('/admin porta alla pagina della web app', async () => {
+    const r = await app.inject('/admin');
+    assert.equal(r.statusCode, 302);
+    assert.equal(r.headers.location, '/#/admin');
+  });
+});

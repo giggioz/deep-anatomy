@@ -67,19 +67,25 @@ risposta, e al proprietario arriva un avviso.
 - Limiti contro i tentativi a raffica: per IP sulle rotte di accesso, e blocco di 15 minuti dopo 10 password sbagliate.
 - Tutte le rotte `/api/*` chiedono l'accesso, tranne `/api/salute` e quelle di `/api/auth/*` che servono per entrare.
 
+**Amministrazione** (`/admin`, solo per l'account `AMMINISTRATORE` in `packages/shared/src/admin.ts`): tabella di tutti
+gli account con creazione, ultimo accesso, ultima attività, sessioni aperte, diagnosi create (e importate), approvazioni,
+chiamate al modello e distretti usati, più le registrazioni in attesa. Le diagnosi restano nel browser: al server arriva
+solo un conteggio (`POST /api/attivita`: tipo, distretto, origine), senza testi né paziente.
+
 ## Struttura
 
 ```
 packages/shared/      il contratto dei dati, usato da web e server
   src/schema.ts         Diagnosi, Reperto, Testi, richieste e risposte di Importa (zod)
   src/accesso.ts        richieste e risposte di /api/auth, regole della password
+  src/admin.ts          amministratore, conteggi d'uso, elenco degli account
   src/libreria.ts       formato delle Tavole Anatomiche (library.json)
   src/spiegazioni.ts    frasi standard per il paziente (tipi di reperto, gravità, fonti)
 apps/web/             React + Vite
   public/librerie/      le librerie di tavole, una per distretto e lato, + indice.json
   src/tavole/           Tavola.tsx (SVG interattivo), overlay.ts (disegno dei reperti), materiali.css, defs.svg
   src/pages/            Home, Nuova, Importa, Testi, Reperti, Paziente;
-                        Accesso, Registrazione, Conferma, Recupero, ImpostaPassword, Account
+                        Accesso, Registrazione, Conferma, Recupero, ImpostaPassword, Account, Admin
   src/components/       PaginaPaziente (il documento), SchedaReperto, Barra, ...
   src/store/            diagnosi salvate nel browser (localStorage), stato dell'accesso
   src/esempi/           referti inventati per provare Importa, con il risultato già pronto
@@ -87,6 +93,7 @@ apps/server/          Fastify + MongoDB
   src/index.ts          legge il .env, apre il database, si mette in ascolto
   src/app.ts            le rotte: /api/salute, /api/importa, accesso; serve apps/web/dist se esiste
   src/accesso.ts        /api/auth/*: registrazione e conferma, sessioni, recupero e cambio della password
+  src/admin.ts          /api/attivita (conteggi d'uso), /api/admin/account, /admin
   src/utenti.ts         npm run utenti: elenco, disattiva, riattiva
   src/importa.ts        prompt, schema di uscita e chiamata al modello
 deploy/               VPS: PM2, nginx, script di pubblicazione (vedi deploy/README.md)

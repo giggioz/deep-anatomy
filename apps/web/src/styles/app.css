@@ -205,7 +205,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid color-mix(in srgb
 /* ---------- aggiunte ---------- */
 .cap::first-letter { text-transform: uppercase; }
 .seg button.cap { text-transform: capitalize; }
-.barra-d { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
+.barra-d { display: inline-flex; align-items: center; gap: 8px; font: 600 18px/1.2 var(--f-display); color: var(--ink); }
 .ctrl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .ctrl li { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border-radius: 10px; background: var(--warn-soft); }
 .ctrl q { font-style: italic; }
@@ -238,7 +238,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid color-mix(in srgb
 .account-card { max-width: 520px; }
 .account-card h2 { font: 600 22px/1.2 var(--f-display); margin: 0; }
 .barra-utente { max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; }
-.barra-utente[aria-current] { border-color: var(--accent); }
+.barra-utente[aria-current], .barra-admin[aria-current] { border-color: var(--accent); }
 /* barra in alto: marchio a sinistra, la diagnosi aperta al centro, passi ed Esci a destra */
 .topbar-dx { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-left: auto; }
 @media (min-width: 1100px) {
@@ -268,3 +268,31 @@ input:focus, select:focus, textarea:focus { outline: 2px solid color-mix(in srgb
 #root { min-height: 100vh; display: flex; flex-direction: column; }
 #root > main, #root > .consegna { width: 100%; }
 #root > .piede { margin-top: auto; }
+
+/* ---------- amministrazione ---------- */
+.admin-totali { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.admin-totale { display: flex; flex-direction: column; gap: 6px; padding: 16px; }
+.admin-totale b { font: 600 30px/1 var(--f-display); }
+.admin-totale span { color: var(--muted); font-size: 13.5px; }
+.admin-strumenti { display: flex; gap: 12px; align-items: center; }
+.admin-strumenti input { max-width: 340px; }
+.admin-tabella { padding: 0; overflow-x: auto; }
+.admin-tabella table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.admin-tabella th, .admin-tabella td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; white-space: nowrap; }
+.admin-tabella tbody tr:last-child td { border-bottom: 0; }
+.admin-tabella tbody tr:hover { background: var(--plate); }
+.admin-tabella th { background: var(--plate); }
+.admin-tabella th button { border: 0; background: none; padding: 0; font: 500 11.5px var(--f-mono); letter-spacing: .06em;
+  text-transform: uppercase; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.admin-tabella th[aria-sort] button { color: var(--ink); }
+.admin-tabella th button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.admin-tabella .num { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.admin-tabella td a { color: var(--muted); font-size: 13px; text-decoration: none; }
+.admin-tabella td a:hover { color: var(--accent); text-decoration: underline; }
+.admin-distretti { color: var(--muted); }
+.admin-stato { font: 500 11.5px var(--f-mono); letter-spacing: .04em; padding: 3px 8px; border-radius: 999px; }
+.admin-stato.ok { color: var(--ok); background: var(--ok-soft); }
+.admin-stato.warn { color: var(--s2); background: var(--s2-soft); }
+.admin-stato.off { color: var(--s3); background: var(--s3-soft); }
+.admin-attesa-card h2 { font: 600 22px/1.2 var(--f-display); margin: 0; }
+.admin-attesa { margin: 0; padding-left: 1.15em; display: flex; flex-direction: column; gap: 4px; font-size: 14.5px; }
