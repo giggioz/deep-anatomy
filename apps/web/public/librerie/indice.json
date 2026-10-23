@@ -16,6 +16,22 @@
     "file": "ginocchio-sinistro.json"
   },
   {
+    "distretto": "gomito",
+    "lato": "destro",
+    "nome": "Gomito",
+    "versione": "0.1",
+    "stato": "da validare",
+    "file": "gomito-destro.json"
+  },
+  {
+    "distretto": "gomito",
+    "lato": "sinistro",
+    "nome": "Gomito",
+    "versione": "0.1",
+    "stato": "da validare",
+    "file": "gomito-sinistro.json"
+  },
+  {
     "distretto": "spalla",
     "lato": "destro",
     "nome": "Spalla",

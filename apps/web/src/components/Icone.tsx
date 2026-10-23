@@ -35,3 +35,12 @@ export const IcoChiudi = (p: { size?: number }) => <Ico {...p}><path d="M6 6l12 
 export const IcoFile = (p: { size?: number }) => (
   <Ico {...p}><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" /><path d="M14 3v5h5" /></Ico>
 );
+export const IcoMail = (p: { size?: number }) => (
+  <Ico {...p}><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></Ico>
+);
+export const IcoTelefono = (p: { size?: number }) => (
+  <Ico {...p}><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" /></Ico>
+);
+export const IcoChat = (p: { size?: number }) => (
+  <Ico {...p}><path d="M20 11.5a8 8 0 0 1-11.6 7.1L4 20l1.4-4.2A8 8 0 1 1 20 11.5Z" /></Ico>
+);

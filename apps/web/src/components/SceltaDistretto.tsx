@@ -5,6 +5,7 @@ import type { VoceIndice } from '../tavole/libreria';
 const INFO: Record<Distretto, string> = {
   ginocchio: 'Menischi, crociati, collaterali, cartilagini, tendini.',
   spalla: 'Cuffia dei rotatori, labbro glenoideo, borsa, acromion-claveare.',
+  gomito: 'Epicondili e loro tendini, collaterali, testa del radio, olecrano.',
 };
 
 interface Props {
@@ -20,12 +21,12 @@ export function SceltaDistretto({ distretto, lato, onDistretto, onLato, indice }
   return (
     <div className="stack">
       <div className="field" role="group" aria-labelledby="l-distretto">
-        <span id="l-distretto" style={{ fontWeight: 600 }}>Distretto</span>
+        <span id="l-distretto" style={{ fontWeight: 600 }}>Scegli il distretto</span>
         <div className="opts">
           {DISTRETTI.map((d) => (
             <button key={d} type="button" className="opt" aria-pressed={d === distretto} onClick={() => onDistretto(d)}>
               <b className="cap">{d}</b>
-              <small>{INFO[d]}</small>
+              {/* <small>{INFO[d]}</small> */}
               {indice && <small className="mono">{tavole(d).length ? `libreria ${tavole(d)[0]!.versione} · ${tavole(d)[0]!.stato}` : 'non disponibile'}</small>}
             </button>
           ))}

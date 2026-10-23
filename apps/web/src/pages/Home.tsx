@@ -17,24 +17,29 @@ export function Home() {
   return (
     <main className="page narrow">
       <div className="head">
-        <div className="eyebrow">Deep Anatomy</div>
+        
         <h1>La tua diagnosi, spiegata al paziente.</h1>
-        <p>
-          Scrivi o importa la diagnosi, indica i reperti sulle tavole anatomiche: il paziente riceve una pagina con
-          parole semplici e disegni, costruita solo su ciò che hai scritto tu.
-        </p>
+        <ul>
+          <li>Scrivi o importa la diagnosi</li>
+          <li>Indica i reperti sulle tavole anatomiche</li>
+          <li>Il paziente riceve una pagina con parole semplici e disegni</li>
+        </ul>
       </div>
 
       <div className="choices">
         <a className="choice" href={link.nuova}>
           <span className="ico"><IcoCrea size={22} /></span>
           <h2>Crea diagnosi</h2>
-          <p>Scegli il distretto, scrivi diagnosi, anamnesi, esame obiettivo, esame strumentale e terapia, poi tocca sulle tavole le strutture con un reperto.</p>
+          <ul>
+            <li>Scegli la parte anatomica</li>
+            <li>Scrivi la diagnosi</li>
+            <li>Tocca sulle tavole anatomiche per segnalare i reperti</li>
+          </ul>
           <span className="go">Inizia →</span>
         </a>
         <a className="choice" href={link.importa}>
           <span className="ico"><IcoImporta size={22} /></span>
-          <h2>Importa diagnosi</h2>
+          <h2>Importa diagnosi (alpha)</h2>
           <p>Incolla il testo di un referto o carica una foto o un PDF: l'intelligenza artificiale precompila lo stesso modulo, tu controlli e correggi.</p>
           <span className="go">Importa →</span>
         </a>
@@ -42,9 +47,12 @@ export function Home() {
 
       <section className="card stack" aria-labelledby="t-elenco">
         <div className="row between">
-          <h2 id="t-elenco" className="eyebrow">Le diagnosi in questo browser</h2>
+          <h2 id="t-elenco" className="eyebrow">Diagnosi create</h2>
           <small className="muted">{elenco.length ? `${elenco.length} salvate` : ''}</small>
         </div>
+        <p className="note info">
+          Le diagnosi vengono salvate soltanto localmente: nessun salvataggio nel cloud.
+        </p>
         {elenco.length === 0 ? (
           <p className="empty">
             Ancora nessuna diagnosi. Per vedere subito il risultato, apri <a href={link.importa}>Importa</a> e scegli un referto di esempio.
@@ -54,7 +62,7 @@ export function Home() {
             {elenco.map((d) => (
               <div className="list-row" key={d.id}>
                 <div>
-                  <a href={d.stato === 'approvata' ? link.passo(d.id, 'anteprima') : link.passo(d.id, 'testi')}>
+                  <a href={d.stato === 'approvata' ? link.passo(d.id, 'paziente') : link.passo(d.id, 'diagnosi')}>
                     <span className="cap">{nomeDistretto(d.distretto, d.lato)}</span>
                     {d.paziente ? ` · ${d.paziente}` : ''}
                   </a>

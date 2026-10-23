@@ -57,6 +57,7 @@ export interface Libreria {
 export const DISTRETTI_INFO: Record<Distretto, { nome: string; femminile: boolean }> = {
   ginocchio: { nome: 'ginocchio', femminile: false },
   spalla: { nome: 'spalla', femminile: true },
+  gomito: { nome: 'gomito', femminile: false },
 };
 
 /** "ginocchio destro", "spalla sinistra" */

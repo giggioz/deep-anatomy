@@ -3,7 +3,7 @@
  * insieme alle tavole. La spiegazione di un reperto = descrizione della struttura (dalla libreria)
  * + frase del tipo di reperto. Il medico può sempre scriverne una sua.
  */
-import type { Fonte, Peso, Reperto, TipoReperto } from './schema.js';
+import { FONTI, type Fonte, type Peso, type Reperto, type TipoReperto } from './schema.js';
 import type { Struttura } from './libreria.js';
 
 export const TIPI: Record<TipoReperto, { etichetta: string; frase: string }> = {
@@ -42,8 +42,12 @@ export const FONTI_ETICHETTE: Record<Fonte, string> = {
   ecografia: 'Ecografia',
   rx: 'Radiografia',
   tc: 'TC',
-  altro: 'Altro',
 };
+
+/** Le fonti di un reperto in un'unica riga, sempre nello stesso ordine. */
+export function etichetteFonti(fonti: readonly Fonte[]): string {
+  return FONTI.filter((f) => fonti.includes(f)).map((f) => FONTI_ETICHETTE[f]).join(', ');
+}
 
 export function spiegazioneReperto(r: Pick<Reperto, 'tipo' | 'spiegazione'>, s: Struttura | undefined): string {
   if (r.spiegazione && r.spiegazione.trim()) return r.spiegazione.trim();

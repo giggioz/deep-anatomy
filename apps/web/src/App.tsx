@@ -8,8 +8,15 @@ import { Nuova } from './pages/Nuova';
 import { Importa } from './pages/Importa';
 import { Testi } from './pages/Testi';
 import { Reperti } from './pages/Reperti';
-import { Anteprima } from './pages/Anteprima';
 import { Paziente } from './pages/Paziente';
+import { Accesso } from './pages/Accesso';
+import { Registrazione } from './pages/Registrazione';
+import { Conferma } from './pages/Conferma';
+import { Recupero } from './pages/Recupero';
+import { ImpostaPassword } from './pages/ImpostaPassword';
+import { Account } from './pages/Account';
+import { PieDiPagina } from './components/PieDiPagina';
+import { useAccesso } from './store/accesso';
 
 function Messaggio({ titolo, children }: { titolo: string; children: ReactNode }) {
   return (
@@ -24,22 +31,31 @@ function PaginaDiagnosi({ rotta }: { rotta: Extract<Rotta, { id: string }> }) {
   const d = useDiagnosi(rotta.id);
   const lib = useLibreria(d?.distretto, d?.lato);
   if (!d) return <Messaggio titolo="Diagnosi non trovata">Forse è stata eliminata, o è salvata in un altro browser.</Messaggio>;
-  if (rotta.pagina === 'testi') return <Testi d={d} />;
+  if (rotta.pagina === 'diagnosi') return <Testi d={d} />;
   if (lib.stato === 'carica') return <main className="page"><p className="muted">Carico le tavole…</p></main>;
   if (lib.stato === 'errore') return <Messaggio titolo="Tavole non disponibili">{lib.errore}</Messaggio>;
   switch (rotta.pagina) {
     case 'reperti': return <Reperti key={d.id} d={d} lib={lib.dati} />;
-    case 'anteprima': return <Anteprima d={d} lib={lib.dati} />;
     case 'paziente': return <Paziente d={d} lib={lib.dati} />;
   }
 }
 
 export function App() {
   const rotta = useRotta();
-  if (rotta.pagina === 'paziente') return <PaginaDiagnosi rotta={rotta} />;
+  const accesso = useAccesso();
+  // i link delle email valgono anche da dentro: chi sceglie la password nuova la sceglie e basta
+  if (rotta.pagina === 'password') return <ImpostaPassword gettone={rotta.gettone} />;
+  if (rotta.pagina === 'conferma') return <Conferma gettone={rotta.gettone} />;
+  if (accesso.stato === 'carica') return null;
+  if (accesso.stato === 'fuori') {
+    if (rotta.pagina === 'registrazione') return <Registrazione />;
+    if (rotta.pagina === 'recupero') return <Recupero />;
+    return <Accesso />;
+  }
   let pagina: ReactNode;
   switch (rotta.pagina) {
-    case 'home': pagina = <Home />; break;
+    case 'home': case 'registrazione': case 'recupero': pagina = <Home />; break;
+    case 'account': pagina = <Account utente={accesso.utente} />; break;
     case 'nuova': pagina = <Nuova />; break;
     case 'importa': pagina = <Importa />; break;
     case 'sconosciuta': pagina = <Messaggio titolo="Pagina non trovata">L'indirizzo non corrisponde a nessuna pagina.</Messaggio>; break;
@@ -47,8 +63,9 @@ export function App() {
   }
   return (
     <>
-      <Barra rotta={rotta} />
+      <Barra rotta={rotta} utente={accesso.utente} />
       {pagina}
+      <PieDiPagina />
     </>
   );
 }

@@ -53,12 +53,12 @@ function schema(codici: string[]) {
         items: {
           type: 'object',
           additionalProperties: false,
-          required: ['codice', 'tipo', 'peso', 'fonte', 'titolo', 'frase'],
+          required: ['codice', 'tipo', 'peso', 'fonti', 'titolo', 'frase'],
           properties: {
             codice: { anyOf: [{ type: 'string', enum: codici }, { type: 'null' }] },
             tipo: { type: 'string', enum: [...TIPI_REPERTO] },
             peso: { type: 'integer', enum: [0, 1, 2, 3] },
-            fonte: { type: 'string', enum: [...FONTI] },
+            fonti: { type: 'array', items: { type: 'string', enum: [...FONTI] }, minItems: 1 },
             titolo: testo,
             frase: testo,
           },
@@ -102,10 +102,10 @@ Un reperto per ogni struttura anatomica di cui il referto descrive lo stato, com
 - codice: il codice della struttura nell'elenco qui sotto. Scegli il più preciso: se il referto indica una parte (es. il corno posteriore), usa il codice della parte; se parla della struttura intera, usa il codice dell'intera struttura. Se nessun codice corrisponde, metti null.
 - tipo: lesione (rottura, lesione, lacerazione, fissurazione, distacco), usura (degenerazione, tendinosi, condropatia, artrosi, assottigliamento), edema (edema osseo o dei tessuti, contusione ossea), versamento (versamento, falda fluida, borsite con liquido, cisti), norma (integro, regolare, nella norma).
 - peso: una lettura per il paziente, non una classificazione clinica. 3 = importante (rotture complete o di alto grado, lesioni che cambiano la terapia), 2 = moderato, 1 = lieve (iniziale, modesto, minimo), 0 = solo per tipo norma.
-- fonte: da quale esame viene il reperto (${fonti}).
+- fonti: da quali esami viene il reperto, uno o più (${fonti}).
 - titolo: un titolo breve e chiaro, in italiano, es. "Lesione del corno posteriore del menisco mediale".
 - frase: la frase o la parte di frase del referto che descrive il reperto, copiata esattamente.
-Se più esami descrivono la stessa struttura, fai un solo reperto con la fonte più precisa (di solito l'immagine) e la sua frase.
+Se più esami descrivono la stessa struttura, fai un solo reperto: metti in fonti tutti gli esami che la descrivono e come frase quella dell'esame più preciso (di solito l'immagine).
 
 NON MAPPATI
 Metti in non_mappati, con un motivo breve, le frasi che descrivono un reperto ma che non hai trasformato in reperto: test clinici che confermano un reperto già presente, reperti fuori dal distretto o di un lato diverso, frasi ambigue. Non metterci frasi di anamnesi o terapia.
@@ -117,7 +117,7 @@ ${elenco}`;
 export async function importa(req: RichiestaImporta): Promise<RispostaImporta> {
   const chiave = process.env.ANTHROPIC_API_KEY?.trim();
   if (!chiave) {
-    throw new ErroreImporta(503, 'Il server non ha la chiave ANTHROPIC_API_KEY: Importa funziona solo con i referti di esempio.');
+    throw new ErroreImporta(503, 'Il modulo di interpretazione del referto in tempo reale deve essere ancora sviluppato: per ora si possono usare solo i referti di esempio.');
   }
   if (!req.testo?.trim() && !req.file) throw new ErroreImporta(400, 'Manca il referto: incolla il testo o carica un file.');
 

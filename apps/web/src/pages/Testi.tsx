@@ -1,15 +1,31 @@
 /** Passo 1 · i cinque testi del medico. Il paziente li vedrà tutti, così come sono scritti. */
+import { useEffect, useState } from 'react';
 import { CAMPI_TESTO, type Diagnosi } from '@deep-anatomy/shared';
-import { link } from '../router';
+import { leggiAl, link } from '../router';
 import { aggiornaDiagnosi } from '../store/diagnosi';
 import { IcoSpunta } from '../components/Icone';
+import { AvvisoVuoti, campiVuoti } from '../components/AvvisoVuoti';
 
 export function Testi({ d }: { d: Diagnosi }) {
   const vuoti = CAMPI_TESTO.filter((c) => !d.testi[c.chiave].trim()).length;
+  const [verso, setVerso] = useState<string | null>(null);
+  const avanti = link.passo(d.id, 'reperti');
+  const nomiVuoti = campiVuoti(d);
+
+  // arrivando da un avviso del passo 3: porta al campo da sistemare
+  useEffect(() => {
+    const al = leggiAl();
+    const el = al && document.getElementById(al);
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollIntoView({ block: 'center' });
+      el.focus({ preventScroll: true });
+    });
+  }, []);
   return (
     <main className="page narrow">
       <div className="head">
-        <div className="eyebrow">Passo 1 di 3 · Testi</div>
+        <div className="eyebrow">Passo 1 di 3 · Diagnosi</div>
         <h1>Cosa hai trovato</h1>
         <p>Scrivi come scriveresti il referto. Il paziente vedrà questi testi così come sono, accanto alle spiegazioni semplici e alle tavole.</p>
       </div>
@@ -22,7 +38,7 @@ export function Testi({ d }: { d: Diagnosi }) {
       )}
 
       {d.da_controllare && d.da_controllare.length > 0 && (
-        <section className="card stack" aria-labelledby="t-ctrl">
+        <section id="da-controllare" tabIndex={-1} className="card stack" aria-labelledby="t-ctrl">
           <div className="row between">
             <h2 id="t-ctrl" className="eyebrow" style={{ color: 'var(--s2)' }}>Da controllare · {d.da_controllare.length}</h2>
             <button type="button" className="btn small" onClick={() => aggiornaDiagnosi(d.id, ({ da_controllare: _, ...x }) => x)}>
@@ -42,13 +58,8 @@ export function Testi({ d }: { d: Diagnosi }) {
         <div className="grid2">
           <label className="field">
             <span>Riferimento paziente</span>
-            <input type="text" value={d.paziente} maxLength={40} placeholder="Iniziali o codice interno"
+            <input id="campo-paziente" type="text" value={d.paziente} maxLength={40} placeholder="Iniziali o codice interno"
               onChange={(e) => aggiornaDiagnosi(d.id, (x) => ({ ...x, paziente: e.target.value }))} />
-          </label>
-          <label className="field">
-            <span>Medico</span>
-            <input type="text" value={d.medico} maxLength={60} placeholder="Es. Dott. Bianchi"
-              onChange={(e) => aggiornaDiagnosi(d.id, (x) => ({ ...x, medico: e.target.value }))} />
           </label>
         </div>
       </section>
@@ -59,6 +70,7 @@ export function Testi({ d }: { d: Diagnosi }) {
             <span>{c.etichetta}</span>
             <small>{c.aiuto}</small>
             <textarea
+              id={`testo-${c.chiave}`}
               value={d.testi[c.chiave]}
               rows={c.chiave === 'diagnosi' ? 3 : 4}
               onChange={(e) => aggiornaDiagnosi(d.id, (x) => ({ ...x, testi: { ...x.testi, [c.chiave]: e.target.value } }))}
@@ -69,8 +81,11 @@ export function Testi({ d }: { d: Diagnosi }) {
 
       <div className="row between">
         <small className="muted">{vuoti ? `${vuoti} ${vuoti === 1 ? 'campo vuoto: non comparirà' : 'campi vuoti: non compariranno'} nella pagina del paziente.` : 'Tutti i campi sono compilati.'}</small>
-        <a className="btn primary" href={link.passo(d.id, 'reperti')}>Avanti: reperti →</a>
+        <a className="btn primary" href={avanti}
+          onClick={(e) => { if (nomiVuoti.length) { e.preventDefault(); setVerso(avanti); } }}>Avanti: reperti →</a>
       </div>
+
+      <AvvisoVuoti vuoti={nomiVuoti} verso={verso} onChiudi={() => setVerso(null)} />
     </main>
   );
 }

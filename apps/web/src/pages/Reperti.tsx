@@ -5,9 +5,9 @@
  * e l'elenco numerato. Ogni reperto punta a un codice della libreria: è tutto ciò che serve alla pagina
  * del paziente per disegnarlo. Mentre si compila, il reperto compare già sulla tavola.
  */
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
-  FONTI, FONTI_ETICHETTE, NOMI_TIPI_STRUTTURA, ORDINE_TIPI, PESI, TIPI, TIPI_REPERTO,
+  FONTI, FONTI_ETICHETTE, etichetteFonti, NOMI_TIPI_STRUTTURA, ORDINE_TIPI, PESI, TIPI, TIPI_REPERTO,
   partiDi, rinumera, spiegazioneReperto, tavolaContiene, titoloProposto,
   type Diagnosi, type Fonte, type Peso, type Reperto, type TipoReperto,
 } from '@deep-anatomy/shared';
@@ -16,13 +16,13 @@ import { Tavola } from '../tavole/Tavola';
 import { aggiornaDiagnosi } from '../store/diagnosi';
 import { link } from '../router';
 import { Numero, colori } from '../components/SchedaReperto';
-import { IcoCerca, IcoChiudi, IcoElimina, IcoGiu, IcoModifica, IcoSpunta, IcoSu } from '../components/Icone';
+import { IcoCerca, IcoChiudi, IcoElimina, IcoGiu, IcoModifica, IcoSu } from '../components/Icone';
 
 interface Bozza {
   codice: string | null;
   tipo: TipoReperto;
   peso: Peso;
-  fonte: Fonte;
+  fonti: Fonte[];
   titolo: string;
   /** il titolo segue struttura e tipo finché il medico non lo scrive a mano */
   titoloAuto: boolean;
@@ -43,7 +43,7 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
   const [modifica, setModifica] = useState<number | null>(null);
   const [cerca, setCerca] = useState('');
   const [sopra, setSopra] = useState<string | null>(null);
-  const [fonte, setFonte] = useState<Fonte>('rm');
+  const senzaFonte = useRef<HTMLDialogElement>(null);
 
   const tavola = lib.tavole.find((t) => t.id === tavolaId) ?? lib.tavole[0];
   const numTavola = (id: string) => lib.tavole.findIndex((t) => t.id === id) + 1;
@@ -52,7 +52,7 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
   /* il reperto in compilazione compare subito sulla tavola */
   const nBozza = modifica ?? d.reperti.length + 1;
   const daBozza = (b: Bozza, n: number): Reperto => ({
-    n, codice: b.codice, tipo: b.tipo, peso: b.tipo === 'norma' ? 0 : b.peso, fonte: b.fonte,
+    n, codice: b.codice, tipo: b.tipo, peso: b.tipo === 'norma' ? 0 : b.peso, fonti: b.fonti,
     titolo: b.titolo.trim() || titoloProposto(b.tipo, b.codice ? S[b.codice] : undefined),
     frase: b.frase.trim(),
     ...(b.spiegazione.trim() ? { spiegazione: b.spiegazione.trim() } : {}),
@@ -74,7 +74,7 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
     mostraSuTavola(codice);
     setBozza((b) => {
       if (!b) {
-        return { codice, tipo: 'lesione', peso: 2, fonte, titolo: titoloProposto('lesione', S[codice]), titoloAuto: true, frase: '', spiegazione: '' };
+        return { codice, tipo: 'lesione', peso: 2, fonti: [], titolo: titoloProposto('lesione', S[codice]), titoloAuto: true, frase: '', spiegazione: '' };
       }
       return { ...b, codice, titolo: b.titoloAuto ? titoloProposto(b.tipo, S[codice]) : b.titolo };
     });
@@ -85,7 +85,7 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
     if (!r) return;
     setModifica(n);
     setBozza({
-      codice: r.codice, tipo: r.tipo, peso: r.peso, fonte: r.fonte, titolo: r.titolo,
+      codice: r.codice, tipo: r.tipo, peso: r.peso, fonti: r.fonti, titolo: r.titolo,
       titoloAuto: r.titolo === titoloProposto(r.tipo, r.codice ? S[r.codice] : undefined),
       frase: r.frase, spiegazione: r.spiegazione ?? '',
     });
@@ -101,13 +101,7 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
       ...x,
       reperti: rinumera(modifica != null ? x.reperti.map((y) => (y.n === modifica ? r : y)) : [...x.reperti, r]),
     }));
-    setFonte(b.fonte);
     chiudi();
-  }
-
-  function nellaNorma() {
-    if (!bozza?.codice) return;
-    salva({ ...bozza, tipo: 'norma', peso: 0, titolo: titoloProposto('norma', S[bozza.codice]), titoloAuto: true });
   }
 
   function sposta(n: number, di: -1 | 1) {
@@ -173,7 +167,11 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
       <div className="head">
         <div className="eyebrow">Passo 2 di 3 · Reperti</div>
         <h1>Indica i reperti sulle tavole</h1>
-        <p>Tocca una struttura sulla tavola, o cercala per nome, e descrivi cosa hai trovato. Indica anche le strutture nella norma che vuoi far vedere al paziente: ricevono il loro numero, in verde.</p>
+        <ul>
+          <li>Tocca una struttura sulla tavola, o cercala per nome.</li>
+          <li>Descrivi cosa hai trovato.</li>
+          
+        </ul>
       </div>
 
       <div className="editor">
@@ -214,7 +212,7 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
           <section className="card stack" aria-label="Cerca una struttura">
             <label className="field">
               <span className="row" style={{ gap: 6 }}><IcoCerca size={16} /> Cerca una struttura</span>
-              <input type="search" value={cerca} onChange={(e) => setCerca(e.target.value)} placeholder={lib.distretto === 'spalla' ? 'Es. sovraspinato, labbro, borsa' : 'Es. menisco, crociato, condilo'} />
+              <input type="search" value={cerca} onChange={(e) => setCerca(e.target.value)} placeholder={{ spalla: 'Es. sovraspinato, labbro, borsa', gomito: 'Es. epicondilo, collaterale, olecrano', ginocchio: 'Es. menisco, crociato, condilo' }[lib.distretto]} />
             </label>
             {risultati.length > 0 && (
               <div className="search-res">
@@ -273,12 +271,6 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
                 </div>
               )}
 
-              {bozza.codice && modifica == null && (
-                <button type="button" className="btn small" style={{ alignSelf: 'flex-start' }} onClick={nellaNorma}>
-                  <IcoSpunta size={16} /> Nella norma, aggiungi subito
-                </button>
-              )}
-
               <div className="field">
                 <span style={{ fontWeight: 600 }}>Cosa hai trovato</span>
                 <div className="seg">
@@ -295,15 +287,24 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
                       <button key={p} type="button" aria-pressed={bozza.peso === p} style={colori(p)} onClick={() => aggiorna('peso', p)}>{PESI[p].etichetta}</button>
                     ))}
                   </div>
-                  <small className="muted" style={{ fontSize: 13 }}>Decide il colore sulle tavole. È una lettura per il paziente, non una classificazione clinica.</small>
+                  
                 </div>
               )}
-              <label className="field">
+              <div className="field">
                 <span>Da dove viene</span>
-                <select value={bozza.fonte} onChange={(e) => aggiorna('fonte', e.target.value as Fonte)}>
-                  {FONTI.map((f) => <option key={f} value={f}>{FONTI_ETICHETTE[f]}</option>)}
-                </select>
-              </label>
+                <small>Puoi sceglierne più di uno.</small>
+                <div className="row" style={{ gap: 6 }}>
+                  {FONTI.map((f) => {
+                    const scelta = bozza.fonti.includes(f);
+                    return (
+                      <button key={f} type="button" className="chip-btn" aria-pressed={scelta}
+                        onClick={() => aggiorna('fonti', scelta ? bozza.fonti.filter((x) => x !== f) : FONTI.filter((x) => x === f || bozza.fonti.includes(x)))}>
+                        {FONTI_ETICHETTE[f]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               <label className="field">
                 <span>Titolo</span>
                 <input type="text" value={bozza.titolo} onChange={(e) => aggiorna('titolo', e.target.value)} />
@@ -315,7 +316,7 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
               </label>
               <label className="field">
                 <span>Spiegazione per il paziente</span>
-                <small>Se la lasci vuota si usa quella standard, qui sotto in grigio.</small>
+                <small>Se la lasci vuota e non hai scritto la tua frase, si usa quella standard, qui sotto in grigio.</small>
                 <textarea rows={3} value={bozza.spiegazione} placeholder={spiegazioneReperto({ tipo: bozza.tipo }, sb)}
                   onChange={(e) => aggiorna('spiegazione', e.target.value)} />
               </label>
@@ -325,13 +326,26 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
                   : <span />}
                 <div className="row">
                   <button type="button" className="btn" onClick={chiudi}>Annulla</button>
-                  <button type="button" className="btn primary" onClick={() => salva()}>
+                  <button type="button" className="btn primary"
+                    onClick={() => (bozza.fonti.length ? salva() : senzaFonte.current?.showModal())}>
                     {modifica != null ? `Salva reperto ${modifica}` : `Aggiungi reperto ${nBozza}`}
                   </button>
                 </div>
               </div>
             </section>
           )}
+
+          {/* nessuna fonte proposta: se il medico non la indica, glielo si fa notare prima di salvare */}
+          <dialog ref={senzaFonte} className="avviso" aria-labelledby="avviso-fonte">
+            <h2 id="avviso-fonte">Da dove viene?</h2>
+            <p className="muted">Non hai indicato da quale esame viene il reperto. Il paziente non vedrà la fonte.</p>
+            <div className="row end">
+              <button type="button" className="btn" onClick={() => senzaFonte.current?.close()}>Chiudi</button>
+              <button type="button" className="btn primary" onClick={() => { senzaFonte.current?.close(); salva(); }}>
+                {modifica != null ? 'Salva comunque' : 'Aggiungi comunque'}
+              </button>
+            </div>
+          </dialog>
 
           <section className="card stack" aria-labelledby="t-elenco">
             <div className="row between">
@@ -349,7 +363,7 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
                       <b>{r.titolo}</b>
                       <small>
                         {r.codice ? S[r.codice]?.n ?? r.codice : <span className="warn">Senza posizione sulle tavole</span>}
-                        {' · '}{TIPI[r.tipo].etichetta} · {FONTI_ETICHETTE[r.fonte]}
+                        {' · '}{TIPI[r.tipo].etichetta}{r.fonti.length > 0 && <> · {etichetteFonti(r.fonti)}</>}
                       </small>
                     </button>
                     <div className="acts">
@@ -363,9 +377,10 @@ export function Reperti({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
             )}
           </section>
 
-          <div className="row between">
-            <a className="btn" href={link.passo(d.id, 'testi')}>← Testi</a>
-            <a className="btn primary" href={link.passo(d.id, 'anteprima')}>Avanti: anteprima →</a>
+          <div className="row" style={{ justifyContent: 'flex-end' }}>
+            {d.reperti.length > 0
+              ? <a className="btn primary" href={link.passo(d.id, 'paziente')}>Avanti: pagina paziente →</a>
+              : <button type="button" className="btn primary" disabled title="Aggiungi almeno un reperto">Avanti: pagina paziente →</button>}
           </div>
         </div>
       </div>

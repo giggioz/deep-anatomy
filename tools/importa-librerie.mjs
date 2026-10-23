@@ -13,7 +13,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const DEST = fileURLToPath(new URL('../apps/web/public/librerie/', import.meta.url));
-const DISTRETTI = ['ginocchio', 'spalla'];
+const DISTRETTI = ['ginocchio', 'spalla', 'gomito'];
 const LATI = ['destro', 'sinistro'];
 
 function controlla(lib, da) {

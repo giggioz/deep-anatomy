@@ -7,57 +7,57 @@
 .doc-id { margin: 0; display: grid; grid-template-columns: auto auto; gap: 4px 14px; font-size: 13.5px; }
 .doc-id dt { font: 500 11px/1.7 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
 .doc-id dd { margin: 0; font-variant-numeric: tabular-nums; }
-@media (max-width: 760px) { .doc-top { grid-template-columns: 1fr; } }
+@media screen and (max-width: 760px) { .doc-top { grid-template-columns: 1fr; } }
 
 .doc-diagnosi { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 16px; padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; }
 .doc-diagnosi-testo { font: 500 clamp(20px, 2.3vw, 25px)/1.35 var(--f-display); white-space: pre-line; max-width: 70ch; }
-.doc-conti { display: flex; gap: 8px; flex-wrap: wrap; }
+.doc-sintesi { list-style: none; margin: 4px 0 0; padding: 12px 0 0; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+.doc-sintesi li { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+.doc-sintesi-titolo { font-size: 15.5px; }
 
 .doc-testi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-@media (max-width: 760px) { .doc-testi { grid-template-columns: 1fr; } }
-.doc-testo { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+@media screen and (max-width: 760px) { .doc-testi { grid-template-columns: 1fr; } }
+.doc-testo { background: color-mix(in srgb, var(--accent-soft) 55%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--line)); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; }
 .doc-testo h2 { font: 600 21px/1.2 var(--f-display); }
 .doc-testo p { white-space: pre-line; color: var(--ink); font-size: 15.5px; }
-.doc-testo .eyebrow { color: var(--faint); }
-.doc-testo.terapia { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); background: color-mix(in srgb, var(--accent-soft) 55%, var(--surface)); }
-.doc-testo.terapia .eyebrow { color: var(--accent); }
+.doc-testo .eyebrow { color: var(--accent); }
 
 .doc-reperti { display: flex; flex-direction: column; gap: 16px; }
 .sect-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
 .sect-head h2 { font: 600 clamp(24px, 3vw, 34px)/1.1 var(--f-display); letter-spacing: -.01em; }
 .sect-head p { color: var(--muted); font-size: 14.5px; max-width: 62ch; }
 .doc-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 20px; align-items: start; }
-@media (max-width: 1000px) { .doc-grid { grid-template-columns: 1fr; } }
+@media screen and (max-width: 1000px) { .doc-grid { grid-template-columns: 1fr; } }
 .doc-tavole { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .doc-elenco { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: auto; padding-right: 2px; }
-@media (max-width: 1000px) { .doc-elenco { position: static; max-height: none; } }
+@media screen and (max-width: 1000px) { .doc-elenco { position: static; max-height: none; } }
 .doc-elenco > h3 { color: var(--faint); margin-bottom: 2px; }
+.doc-elenco-guida { color: var(--muted); font-size: 14.5px; }
 
 .part { display: flex; flex-direction: column; gap: 16px; }
-.part-head { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; }
+/* gerarchia: titolo della sezione (h2) > parte (h3) > tavola (h4) > testi in grigio */
+.part-head { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
 .part-num { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font: 600 15px var(--f-mono); background: var(--accent-soft); color: var(--accent); }
-.part-head h3 { font: 600 clamp(21px, 2.4vw, 27px)/1.12 var(--f-display); margin-top: 6px; }
-.part-head p { color: var(--muted); font-size: 14.5px; margin-top: 6px; max-width: 60ch; }
-.part.rm { background: var(--rm-bg); border: 1px solid var(--rm-line); border-radius: 20px; padding: 22px 18px 18px; color: var(--rm-ink);
-  --ink: var(--rm-ink); --muted: var(--rm-muted); --faint: #7F8C9C; --line: var(--rm-line); --accent: var(--rm-accent);
-  --lbl: #C3CDD9; --halo: var(--rm-card); --plate: var(--rm-card); --surface: var(--rm-card); }
-.part.rm .part-num { background: #22303F; color: var(--rm-accent); }
-.part.rm .ldr-h { display: none; }
-.part.rm .ldr { stroke: #8C9BAD; }
-.part.rm .ldr-dot { fill: #3A4757; stroke: #F2E4DA; }
+.part-head h3 { font: 600 clamp(21px, 2.4vw, 27px)/1.12 var(--f-display); }
+.part-head p { color: var(--muted); font-size: 15px; margin-top: 4px; max-width: 60ch; }
 .plate { background: var(--plate); border: 1px solid var(--line); border-radius: 18px; padding: 18px 18px 14px; min-width: 0; }
-.plate-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 6px; }
-.plate-head h3 { font: 600 clamp(20px, 2.3vw, 25px)/1.15 var(--f-display); margin-top: 6px; }
-.plate-head p { color: var(--muted); font-size: 14px; max-width: 44ch; }
+.plate-head { margin-bottom: 8px; }
+.plate-head h4 { font: 600 19px/1.2 var(--f-display); margin: 0; }
+.plate-testo { color: var(--muted); font-size: 14px; margin-top: 10px; max-width: 70ch; }
 .figwrap { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
 .plate.big .tavola svg { min-width: 600px; }
 .plate.mid .tavola svg { min-width: 520px; max-width: 900px; margin: 0 auto; }
-.secs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
-.secs figure { margin: 0; min-width: 0; background: var(--rm-card); border: 1px solid var(--rm-line); border-radius: 16px; padding: 14px; }
-.secs .tavola svg { min-width: 280px; }
-.secs figcaption { margin-top: 10px; font-size: 13.5px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
-.secs figcaption b { font: 600 16px var(--f-body); color: var(--ink); }
-@media (max-width: 600px) { .part.rm { padding: 18px 12px 14px; border-radius: 16px; } .plate { padding: 14px 12px 10px; } }
+/* il banco scuro del radiologo: le sezioni una sotto l'altra, con lo stesso rientro delle tavole d'insieme, quindi la stessa larghezza */
+.secs { display: flex; flex-direction: column; background: var(--rm-bg); border: 1px solid var(--rm-line); border-radius: 20px; color: var(--rm-ink);
+  --ink: var(--rm-ink); --muted: var(--rm-muted); --faint: #7F8C9C; --line: var(--rm-line); --accent: var(--rm-accent);
+  --lbl: #C3CDD9; --halo: var(--rm-card); --plate: var(--rm-card); --surface: var(--rm-card); }
+.secs .ldr-h { display: none; }
+.secs .ldr { stroke: #8C9BAD; }
+.secs .ldr-dot { fill: #3A4757; stroke: #F2E4DA; }
+.secs figure { margin: 0; min-width: 0; padding: 18px 18px 14px; }
+.secs figure + figure { border-top: 1px solid var(--rm-line); }
+.secs .tavola svg { min-width: 520px; }
+@media screen and (max-width: 600px) { .secs { border-radius: 16px; } .secs figure, .plate { padding: 14px 12px 10px; } }
 
 /* scheda di un reperto: elenco e popup */
 .scheda { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 7px; }
@@ -69,6 +69,13 @@ article.scheda:hover { border-color: var(--c); }
 .scheda-frase { font-size: 14px; color: var(--muted); font-style: italic; }
 .scheda-sempl { font-size: 15px; color: var(--ink); }
 .scheda-dove { font: 400 12px var(--f-mono); color: var(--faint); }
+.scheda-link { display: flex; flex-direction: column; gap: 3px; padding-top: 4px; }
+.scheda-link a { color: var(--accent); font-weight: 600; font-size: 10px; text-underline-offset: 3px; align-self: flex-start; }
+.scheda-link small { color: var(--faint); font-size: 10px; font-style: italic; }
+.link-tavola { font: inherit; color: var(--accent); background: none; border: 0; padding: 0 2px; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.link-tavola:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 3px; }
+/* sotto la barra in alto, quando un numero dell'elenco porta alla tavola */
+.plate, .secs figure { scroll-margin-top: 76px; }
 .tip.fnd { max-width: 380px; padding: 0; border: 0; background: none; box-shadow: none; }
 .tip.fnd .scheda { box-shadow: 0 12px 30px rgba(20,33,53,.22); }
 .tip .tip-d { display: block; color: var(--muted); margin-top: 3px; }
@@ -79,16 +86,51 @@ article.scheda:hover { border-color: var(--c); }
 
 /* pagina da consegnare */
 .consegna { max-width: 1240px; margin: 0 auto; padding: 18px max(20px, env(safe-area-inset-left, 0px)) 64px; display: flex; flex-direction: column; gap: 20px; }
-.consegna-bar { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
-@media (max-width: 600px) { .consegna { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); } }
-.anteprima-doc { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: clamp(16px, 3vw, 32px); }
+.consegna-bar { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; align-items: center; }
+@media screen and (max-width: 600px) { .consegna { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); } }
+/* avviso prima della stampa */
+.avviso { max-width: min(480px, calc(100vw - 32px)); padding: 24px; border: 1px solid var(--line); border-radius: 18px;
+  background: var(--surface); color: var(--ink); box-shadow: 0 18px 44px rgba(20,33,53,.24); }
+.avviso::backdrop { background: rgba(20,33,53,.42); }
+.avviso h2 { font: 600 22px/1.2 var(--f-display); margin-bottom: 10px; }
+.avviso p { color: var(--muted); font-size: 15.5px; }
+.avviso-azioni { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+/* una bozza non si stampa: in stampa esce solo l'avviso (anche con Cmd/Ctrl+P) */
+.solo-stampa { display: none; }
 
+/* in stampa: la stessa pagina dello schermo largo (colonne, colori, banco scuro), rimpicciolita per stare su A4.
+   Le regole per i telefoni e il tema scuro valgono solo sullo schermo. */
+@page { size: A4; margin: 12mm; }
 @media print {
-  .topbar, .consegna-bar, .no-print { display: none !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .topbar, .consegna-bar, .no-print, .tip { display: none !important; }
   body { background: #fff; }
-  .doc-elenco { position: static; max-height: none; overflow: visible; }
-  .doc-grid { grid-template-columns: 1fr; }
-  .plate, .secs figure, .scheda, .doc-testo, .doc-diagnosi { break-inside: avoid; }
+  .consegna { max-width: none; padding: 0; }
+  .consegna.bozza > :not(.solo-stampa) { display: none !important; }
+  .consegna.bozza > .solo-stampa { display: block; font-size: 16px; }
+  /* 186 mm di pagina utile ≈ 703 px: con questo zoom il documento si impagina come su uno schermo largo circa 980 px */
+  .doc { zoom: .72; }
+  /* le misure in vw seguirebbero il foglio: si fissano a quelle dello schermo largo */
+  .doc-top h1 { font-size: 60px; }
+  .doc-diagnosi-testo { font-size: 25px; }
+  .sect-head h2 { font-size: 34px; }
+  .part-head h3 { font-size: 27px; }
+  /* prima l'elenco dei reperti, due per riga, poi le tavole a tutta larghezza */
+  .doc-grid { display: flex; flex-direction: column; align-items: stretch; gap: 28px; }
+  .doc-elenco { order: -1; position: static; max-height: none; overflow: visible; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .doc-elenco > :not(.scheda) { grid-column: 1 / -1; }
+  /* le viste del radiologo su carta chiara, come le altre tavole */
+  .secs { background: none; border: 0; border-radius: 0; gap: 20px; color: var(--ink);
+    --ink: #142135; --muted: #556275; --faint: #8995A6; --line: #D8DFE7; --accent: #245A80;
+    --lbl: #5A6577; --halo: #FAFBFC; --plate: #FAFBFC; --surface: #FFFFFF; }
+  .secs figure { background: var(--plate); border: 1px solid var(--line); border-radius: 18px; }
+  .secs figure + figure { border-top: 1px solid var(--line); }
+  .secs .tavola svg { max-width: 620px; margin: 0 auto; }   /* due sezioni per pagina */
+  .secs .ldr-h { display: inline; }
+  .secs .ldr { stroke: var(--faint); }
+  .secs .ldr-dot { fill: var(--lbl); stroke: var(--halo); }
+  .plate, .secs figure, .scheda, .doc-testo, .doc-diagnosi, .doc-top { break-inside: avoid; }
+  .sect-head, .part-head, .doc-elenco > h3, .doc-elenco-guida { break-after: avoid; }
   .figwrap { overflow: visible; }
   .plate.big .tavola svg, .plate.mid .tavola svg, .secs .tavola svg { min-width: 0; }
   .pulse { animation: none; }

@@ -7,10 +7,10 @@
  */
 import { z } from 'zod';
 
-export const DISTRETTI = ['ginocchio', 'spalla'] as const;
+export const DISTRETTI = ['ginocchio', 'spalla', 'gomito'] as const;
 export const LATI = ['destro', 'sinistro'] as const;
 export const TIPI_REPERTO = ['lesione', 'usura', 'edema', 'versamento', 'norma'] as const;
-export const FONTI = ['esame-clinico', 'rm', 'ecografia', 'rx', 'tc', 'altro'] as const;
+export const FONTI = ['esame-clinico', 'rm', 'ecografia', 'rx', 'tc'] as const;
 
 export const Distretto = z.enum(DISTRETTI);
 export const Lato = z.enum(LATI);
@@ -27,14 +27,15 @@ export const Testi = z.object({
   terapia: z.string(),
 });
 
-export const Reperto = z.object({
+const RepertoBase = z.object({
   /** numero mostrato sulle tavole: segue l'ordine dell'elenco, anche per i reperti nella norma */
   n: z.number().int().positive(),
   /** codice di una struttura della libreria, oppure null se il reperto non ha una posizione (es. da Importa) */
   codice: z.string().nullable(),
   tipo: TipoReperto,
   peso: Peso,
-  fonte: Fonte,
+  /** gli esami da cui viene il reperto: uno o più */
+  fonti: z.array(Fonte),
   /** titolo breve, es. "Lesione del corno posteriore del menisco mediale" */
   titolo: z.string(),
   /** la frase del medico o del referto, così come è scritta */
@@ -42,6 +43,19 @@ export const Reperto = z.object({
   /** spiegazione semplice scritta dal medico; se vuota si usa quella standard (spiegazioni.ts) */
   spiegazione: z.string().optional(),
 });
+
+/**
+ * Le diagnosi salvate prima avevano una sola fonte (`fonte`): diventa un elenco di una voce.
+ * La fonte "altro" non esiste più: si toglie.
+ */
+function migraFonte(v: unknown): unknown {
+  if (!v || typeof v !== 'object') return v;
+  const { fonte, ...resto } = v as { fonte?: unknown; fonti?: unknown };
+  const fonti = Array.isArray(resto.fonti) ? resto.fonti : fonte !== undefined ? [fonte] : resto.fonti;
+  return { ...resto, fonti: Array.isArray(fonti) ? fonti.filter((f) => f !== 'altro') : fonti };
+}
+
+export const Reperto = z.preprocess(migraFonte, RepertoBase);
 
 export const StatoDiagnosi = z.enum(['bozza', 'approvata']);
 
@@ -54,6 +68,7 @@ export const Diagnosi = z.object({
   lato: Lato,
   /** come il medico vuole riconoscere il paziente nell'elenco: iniziali, un riferimento interno. Niente dati sensibili nella demo. */
   paziente: z.string(),
+  /** il nome dell'account che ha creato la diagnosi; compare nella pagina del paziente */
   medico: z.string(),
   testi: Testi,
   reperti: z.array(Reperto),
@@ -90,7 +105,7 @@ export const RichiestaImporta = z.object({
   file: z.object({ dati: z.string(), tipo: z.enum(['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf']) }).optional(),
 });
 
-export const RepertoImportato = Reperto.omit({ n: true, spiegazione: true });
+export const RepertoImportato = RepertoBase.omit({ n: true, spiegazione: true });
 
 export const RispostaImporta = z.object({
   testi: Testi,
