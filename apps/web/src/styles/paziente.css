@@ -48,16 +48,43 @@
 .plate.big .tavola svg { min-width: 600px; }
 .plate.mid .tavola svg { min-width: 520px; max-width: 900px; margin: 0 auto; }
 /* il banco scuro del radiologo: le sezioni una sotto l'altra, con lo stesso rientro delle tavole d'insieme, quindi la stessa larghezza */
-.secs { display: flex; flex-direction: column; background: var(--rm-bg); border: 1px solid var(--rm-line); border-radius: 20px; color: var(--rm-ink);
+.secs { display: flex; flex-direction: column; background: var(--rm-bg); border: 1px solid var(--rm-line); border-radius: 20px; }
+.secs, .tavola-grande.rm { color: var(--rm-ink);
   --ink: var(--rm-ink); --muted: var(--rm-muted); --faint: #7F8C9C; --line: var(--rm-line); --accent: var(--rm-accent);
   --lbl: #C3CDD9; --halo: var(--rm-card); --plate: var(--rm-card); --surface: var(--rm-card); }
-.secs .ldr-h { display: none; }
-.secs .ldr { stroke: #8C9BAD; }
-.secs .ldr-dot { fill: #3A4757; stroke: #F2E4DA; }
+.secs .ldr-h, .tavola-grande.rm .ldr-h { display: none; }
+.secs .ldr, .tavola-grande.rm .ldr { stroke: #8C9BAD; }
+.secs .ldr-dot, .tavola-grande.rm .ldr-dot { fill: #3A4757; stroke: #F2E4DA; }
 .secs figure { margin: 0; min-width: 0; padding: 18px 18px 14px; }
 .secs figure + figure { border-top: 1px solid var(--rm-line); }
 .secs .tavola svg { min-width: 520px; }
 @media screen and (max-width: 600px) { .secs { border-radius: 16px; } .secs figure, .plate { padding: 14px 12px 10px; } }
+
+/* telefono (stesso limite di Tavola.tsx): la tavola entra tutta in larghezza, inquadrata sul disegno, senza le etichette;
+   i numeri si ingrandiscono (--k) per poterli toccare. I nomi completi sono in "Ingrandisci con i nomi". */
+.ingrandisci { display: none; }
+@media screen and (max-width: 640px) {
+  .figwrap { overflow: visible; }
+  .plate.big .tavola svg, .plate.mid .tavola svg, .secs .tavola svg { min-width: 0; }
+  .tavola.stretta .lb { display: none; }
+  .tavola.stretta .bub { transform-box: fill-box; transform-origin: center; transform: translate(var(--dx, 0px), var(--dy, 0px)) scale(var(--k, 1)); }
+  .ingrandisci { display: inline-flex; margin-top: 10px; }
+  .secs .ingrandisci { background: var(--rm-card); color: var(--rm-ink); border-color: var(--rm-line); }
+}
+.tip { max-width: min(340px, calc(100vw - 16px)); }
+
+/* la tavola a schermo intero, con le etichette: si scorre in tutte le direzioni */
+.tavola-grande { width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+  background: var(--plate); color: var(--ink); }
+.tavola-grande.rm { background: var(--rm-bg); }
+.tavola-grande[open] { display: flex; flex-direction: column; }
+.tavola-grande > header { display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: max(12px, env(safe-area-inset-top, 0px)) 16px 0; }
+.tavola-grande h2 { font: 600 18px/1.2 var(--f-display); }
+.tavola-grande-guida { padding: 4px 16px 8px; color: var(--muted); font-size: 13.5px; }
+.tavola-grande-fig { flex: 1; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  display: flex; flex-direction: column; padding: 8px 16px max(16px, env(safe-area-inset-bottom, 0px)); }
+.tavola-grande-fig .tavola { width: max(100%, calc(var(--w) * .85)); margin-block: auto; flex: none; }
 
 /* scheda di un reperto: elenco e popup */
 .scheda { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 7px; }
@@ -76,7 +103,7 @@ article.scheda:hover { border-color: var(--c); }
 .link-tavola:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 3px; }
 /* sotto la barra in alto, quando un numero dell'elenco porta alla tavola */
 .plate, .secs figure { scroll-margin-top: 76px; }
-.tip.fnd { max-width: 380px; padding: 0; border: 0; background: none; box-shadow: none; }
+.tip.fnd { max-width: min(380px, calc(100vw - 16px)); padding: 0; border: 0; background: none; box-shadow: none; }
 .tip.fnd .scheda { box-shadow: 0 12px 30px rgba(20,33,53,.22); }
 .tip .tip-d { display: block; color: var(--muted); margin-top: 3px; }
 .tip .tip-inv { display: block; color: var(--accent); margin-top: 6px; font-weight: 500; font-size: 12.5px; }

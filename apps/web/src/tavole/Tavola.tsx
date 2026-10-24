@@ -7,8 +7,11 @@
  *
  * - editor: un tocco su una struttura (o sulla sua etichetta) chiama onStruttura; un tocco su un numero chiama onReperto.
  * - paziente: il passaggio o il tocco mostrano il nome della struttura o la scheda del reperto.
+ * - adatta (pagina del paziente): sullo schermo stretto la tavola entra tutta in larghezza, inquadrata sul solo disegno,
+ *   senza le colonne delle etichette (illeggibili a quella scala) e con i numeri ingranditi per poterli toccare.
+ *   I nomi restano nel popup al tocco.
  */
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import type { Reperto, Struttura, Tavola as TTavola } from '@deep-anatomy/shared';
 import { applica, membri } from './overlay';
 import { SchedaReperto } from '../components/SchedaReperto';
@@ -25,14 +28,43 @@ interface Props {
   invito?: string;
   /** mostra il codice tecnico nel popup (solo lato medico) */
   mostraCodici?: boolean;
+  /** sullo schermo stretto inquadra il disegno e nasconde le etichette (vedi sopra) */
+  adatta?: boolean;
   className?: string;
+}
+
+/** Lo stesso limite del CSS (.tavola.stretta); solo sullo schermo, la stampa resta com'è. */
+const STRETTO = 'screen and (max-width: 640px)';
+const iscriviStretto = (f: () => void) => {
+  const m = matchMedia(STRETTO);
+  m.addEventListener('change', f);
+  return () => m.removeEventListener('change', f);
+};
+const leggiStretto = () => matchMedia(STRETTO).matches;
+
+/** Il riquadro del solo disegno (strutture, numeri, orientamento), senza le colonne delle etichette. */
+function inquadra(svg: SVGSVGElement, intera: string): string {
+  const [ox = 0, oy = 0, ow = 0, oh = 0] = intera.split(/[\s,]+/).map(Number);
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  svg.querySelectorAll<SVGGraphicsElement>('.st, .ov .bub, .orient').forEach((e) => {
+    const b = e.getBBox();
+    if (!b.width && !b.height) return;
+    x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
+    x1 = Math.max(x1, b.x + b.width); y1 = Math.max(y1, b.y + b.height);
+  });
+  if (!Number.isFinite(x0)) return intera;
+  const m = 16;
+  x0 = Math.max(ox, x0 - m); y0 = Math.max(oy, y0 - m);
+  x1 = Math.min(ox + ow, x1 + m); y1 = Math.min(oy + oh, y1 + m);
+  return `${x0} ${y0} ${x1 - x0} ${y1 - y0}`;
 }
 
 type Popup =
   | { k: 'st'; codice: string; x: number; y: number; fisso: boolean }
   | { k: 'rep'; n: number; x: number; y: number; fisso: boolean };
 
-export function Tavola({ tavola, strutture, reperti, evidenzia = null, onStruttura, onReperto, invito, mostraCodici, className }: Props) {
+export function Tavola({ tavola, strutture, reperti, evidenzia = null, onStruttura, onReperto, invito, mostraCodici, adatta, className }: Props) {
+  const stretta = useSyncExternalStore(iscriviStretto, leggiStretto) && !!adatta;
   const box = useRef<HTMLDivElement>(null);
   const tip = useRef<HTMLDivElement>(null);
   const [popup, setPopup] = useState<Popup | null>(null);
@@ -79,6 +111,43 @@ export function Tavola({ tavola, strutture, reperti, evidenzia = null, onStruttu
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chiave, tavola, strutture]);
+
+  // 2b) schermo stretto: inquadratura sul disegno e numeri ingranditi (--k) fino a circa 26 px sullo schermo
+  useLayoutEffect(() => {
+    const root = box.current;
+    const svg = root?.querySelector('svg');
+    if (!root || !svg) return;
+    const intera = (svg.dataset.vb ??= svg.getAttribute('viewBox') ?? '');
+    if (!stretta) { svg.setAttribute('viewBox', intera); root.style.removeProperty('--k'); return; }
+    svg.setAttribute('viewBox', inquadra(svg, intera));
+    const w = svg.viewBox.baseVal.width;
+    const ingrandisci = () => {
+      if (!root.clientWidth) return;
+      const k = Math.min(3, Math.max(1, w / root.clientWidth));
+      root.style.setProperty('--k', String(k));
+      // numeri ingranditi che si coprono: il successivo si sposta finché non si toccano più
+      const posati: { x: number; y: number; r: number }[] = [];
+      svg.querySelectorAll<SVGGElement>('.ov .bub').forEach((b) => {
+        const c = b.querySelector('circle');
+        if (!c) return;
+        const p = { x: c.cx.baseVal.value, y: c.cy.baseVal.value, r: c.r.baseVal.value * k + 1.5 };
+        const x0 = p.x, y0 = p.y;
+        for (const q of posati) {
+          const dx = p.x - q.x, dy = p.y - q.y, dist = Math.hypot(dx, dy), min = p.r + q.r;
+          if (dist >= min) continue;
+          const [ux, uy] = dist > 0.5 ? [dx / dist, dy / dist] : [1, 0];
+          p.x = q.x + ux * min; p.y = q.y + uy * min;
+        }
+        b.style.setProperty('--dx', `${p.x - x0}px`);
+        b.style.setProperty('--dy', `${p.y - y0}px`);
+        posati.push(p);
+      });
+    };
+    ingrandisci();
+    const ro = new ResizeObserver(ingrandisci);
+    ro.observe(root);
+    return () => ro.disconnect();
+  }, [chiave, tavola.svg, stretta]);
 
   // 3) evidenziazione dall'esterno
   useEffect(() => { if (sotto.current == null) accendi(evidenzia); }, [evidenzia, accendi, tavola.svg]);
@@ -191,7 +260,7 @@ export function Tavola({ tavola, strutture, reperti, evidenzia = null, onStruttu
     <>
       <div
         ref={box}
-        className={`tavola ${className ?? ''}`}
+        className={`tavola${stretta ? ' stretta' : ''} ${className ?? ''}`}
         onPointerMove={muovi}
         onPointerLeave={esci}
         onClick={(e) => scegli(e.target, e.clientX, e.clientY, (e.nativeEvent as PointerEvent).pointerType === 'touch')}

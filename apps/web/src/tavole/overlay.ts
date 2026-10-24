@@ -44,7 +44,9 @@ export function applica(svg: SVGSVGElement, tavola: Tavola, reperti: Marcabile[]
   if (!ov) return reperti.map((r) => r.n);
   ov.innerHTML = '';
   const assenti: number[] = [];
-  const piccola = tavola.layout === 'sec' || svg.viewBox.baseVal.width < 520;
+  // la larghezza della tavola intera, anche quando sul telefono è inquadrato solo il disegno (Tavola.tsx)
+  const larghezza = svg.dataset.vb ? Number(svg.dataset.vb.split(/[\s,]+/)[2]) : svg.viewBox.baseVal.width;
+  const piccola = tavola.layout === 'sec' || larghezza < 520;
   const marcati: Marcabile[] = [];
   for (const f of reperti) {
     if (!f.codice) { assenti.push(f.n); continue; }

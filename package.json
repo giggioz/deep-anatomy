@@ -1,6 +1,6 @@
 {
   "name": "deep-anatomy",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "type": "module",
   "description": "Deep Anatomy: il referto dell'ortopedico spiegato al paziente, sulle Tavole Anatomiche pregenerate.",

@@ -44,3 +44,6 @@ export const IcoTelefono = (p: { size?: number }) => (
 export const IcoChat = (p: { size?: number }) => (
   <Ico {...p}><path d="M20 11.5a8 8 0 0 1-11.6 7.1L4 20l1.4-4.2A8 8 0 1 1 20 11.5Z" /></Ico>
 );
+export const IcoIngrandisci = (p: { size?: number }) => (
+  <Ico {...p}><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></Ico>
+);

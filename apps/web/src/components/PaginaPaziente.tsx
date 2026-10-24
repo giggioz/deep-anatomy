@@ -5,7 +5,7 @@
  * poi le tavole che contengono almeno un reperto, divise in viste d'insieme e viste del radiologo,
  * con accanto l'elenco numerato dei reperti. Le tavole senza reperti non compaiono.
  */
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   CAMPI_TESTO, PESI, nomeDistretto, tavolaContiene, titoloPaziente,
   type Diagnosi, type Reperto, type Tavola as TTavola,
@@ -13,6 +13,7 @@ import {
 import type { LibreriaPronta } from '../tavole/libreria';
 import { Tavola } from '../tavole/Tavola';
 import { Numero, SchedaReperto, colori } from './SchedaReperto';
+import { IcoIngrandisci } from './Icone';
 
 const TITOLI_PAZIENTE: Record<string, string> = {
   anamnesi: 'La tua storia',
@@ -30,6 +31,12 @@ const LINK_APPROFONDIMENTO = 'https://www.edoardogajortopedico.com/patologie-spa
 
 const idTavola = (id: string) => `tavola-${id}`;
 
+/** la larghezza della tavola intera, dal viewBox: a schermo intero la tavola si mostra a circa 0,85 px per unità */
+function larghezza(t: TTavola): number {
+  const w = Number(/viewBox="[^"]*?\s*\S+\s+\S+\s+(\S+)/.exec(t.svg)?.[1]);
+  return Number.isFinite(w) && w > 0 ? w : 1000;
+}
+
 /** "Tavola 2" o "Tavole 1, 3 e 4": ogni numero porta alla sua tavola. */
 function elencoTavole(ts: { id: string; n: number }[]): ReactNode {
   const vai = (id: string) => document.getElementById(idTavola(id))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -45,6 +52,10 @@ function elencoTavole(ts: { id: string; n: number }[]): ReactNode {
 
 export function PaginaPaziente({ d, lib }: { d: Diagnosi; lib: LibreriaPronta }) {
   const [evid, setEvid] = useState<string | null>(null);
+  /** la tavola aperta a schermo intero, con le etichette (sul telefono) */
+  const [grande, setGrande] = useState<TTavola | null>(null);
+  const finestra = useRef<HTMLDialogElement>(null);
+  useEffect(() => { if (grande) finestra.current?.showModal(); }, [grande]);
   const S = lib.strutture;
 
   const { insieme, radiologo, numeri } = useMemo(() => {
@@ -66,8 +77,14 @@ export function PaginaPaziente({ d, lib }: { d: Diagnosi; lib: LibreriaPronta })
   const nome = nomeDistretto(d.distretto, d.lato);
   const [prima, dopo] = titoloPaziente(d.distretto, d.lato).split(nome);
 
+  const repertiDi = (t: TTavola) => d.reperti.filter((r) => r.codice && tavolaContiene(t, r.codice));
   const tavola = (t: TTavola): ReactNode => (
-    <Tavola tavola={t} strutture={S} reperti={d.reperti.filter((r) => r.codice && tavolaContiene(t, r.codice))} evidenzia={evid} />
+    <>
+      <Tavola tavola={t} strutture={S} reperti={repertiDi(t)} evidenzia={evid} adatta />
+      <button type="button" className="btn small ingrandisci" onClick={() => setGrande(t)}>
+        <IcoIngrandisci size={16} /> Ingrandisci con i nomi
+      </button>
+    </>
   );
 
   return (
@@ -204,6 +221,21 @@ export function PaginaPaziente({ d, lib }: { d: Diagnosi; lib: LibreriaPronta })
           </div>
         </section>
       )}
+
+      <dialog ref={finestra} className={`tavola-grande${grande?.parte === 'radiologo' ? ' rm' : ''}`} aria-labelledby="t-grande" onClose={() => setGrande(null)}>
+        {grande && (
+          <>
+            <header>
+              <h2 id="t-grande">Tavola {numeri.get(grande.id)} · {grande.titolo}</h2>
+              <button type="button" className="btn small" onClick={() => finestra.current?.close()} autoFocus>Chiudi</button>
+            </header>
+            <p className="tavola-grande-guida">Scorri per vedere tutta la tavola, tocca un numero per leggere il reperto.</p>
+            <div className="tavola-grande-fig" style={{ '--w': `${larghezza(grande)}px` } as CSSProperties}>
+              <Tavola tavola={grande} strutture={S} reperti={repertiDi(grande)} />
+            </div>
+          </>
+        )}
+      </dialog>
     </article>
   );
 }
